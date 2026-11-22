@@ -4,6 +4,8 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AsyncState from '@/components/AsyncState.vue'
 import AuditInfo from '@/components/AuditInfo.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import { useAuthStore } from '@/modules/auth/stores/authStore'
+import { Permissions } from '@/modules/auth/types'
 import { errorMessage } from '@/services/http'
 import { formatDate, formatDateTime, formatMoney } from '@/utils/format'
 import { purchaseService } from '../services/purchaseService'
@@ -19,7 +21,16 @@ const loading = ref(false)
 const loadError = ref<string | null>(null)
 const success = ref<string | null>(null)
 
-const hasCostWarning = computed(() => purchase.value?.items.some((i) => i.costAtOrAboveSalePrice) ?? false)
+const auth = useAuthStore()
+const canManage = auth.can(Permissions.PurchasesManage)
+
+/** Cancelled purchases and credit purchases with payments cannot be edited (P-83). */
+const canEdit = computed(
+  () =>
+    canManage && !!purchase.value && !purchase.value.isCancelled && !purchase.value.accountPayable?.hasPayments,
+)
+
+const hasCostWarning =computed(() => purchase.value?.items.some((i) => i.costAtOrAboveSalePrice) ?? false)
 
 async function load(): Promise<void> {
   loading.value = true
@@ -31,8 +42,8 @@ async function load(): Promise<void> {
   } finally {
     loading.value = false
   }
-  if (route.query.created === '1') {
-    success.value = 'Compra registrada.'
+  if (route.query.created === '1' || route.query.saved === '1') {
+    success.value = route.query.created === '1' ? 'Compra registrada.' : 'Cambios guardados.'
     await router.replace({ query: {} })
   }
 }
@@ -44,6 +55,9 @@ onMounted(load)
   <section class="page">
     <PageHeader :title="purchase ? `Compra ${purchase.documentNumber}` : 'Compra'">
       <template #actions>
+        <RouterLink v-if="canEdit" :to="{ name: 'purchase-edit', params: { id } }" class="btn btn-primary">
+          Editar
+        </RouterLink>
         <RouterLink :to="{ name: 'purchases' }" class="btn btn-secondary">Volver</RouterLink>
       </template>
     </PageHeader>

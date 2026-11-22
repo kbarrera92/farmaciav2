@@ -4,12 +4,17 @@ import { RouterLink } from 'vue-router'
 import AsyncState from '@/components/AsyncState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import PaginationBar from '@/components/PaginationBar.vue'
+import { useAuthStore } from '@/modules/auth/stores/authStore'
+import { Permissions } from '@/modules/auth/types'
 import { supplierService } from '@/modules/catalog/services/supplierService'
 import { errorMessage, http } from '@/services/http'
 import type { NamedReference, PagedResult } from '@/types/api'
 import { formatDate, formatMoney } from '@/utils/format'
 import { purchaseService } from '../services/purchaseService'
 import { PurchaseType, purchaseTypeLabel, type PurchaseListItem, type PurchaseQuery } from '../types'
+
+const auth = useAuthStore()
+const canCreate = auth.can(Permissions.PurchasesCreate)
 
 const query = reactive<PurchaseQuery>({
   search: '',
@@ -66,6 +71,11 @@ onMounted(async () => {
 <template>
   <section class="page">
     <PageHeader title="Compras" subtitle="Compras a proveedores registradas por sucursal.">
+      <template #actions>
+        <RouterLink v-if="canCreate" :to="{ name: 'purchase-create' }" class="btn btn-primary">
+          Nueva compra
+        </RouterLink>
+      </template>
     </PageHeader>
 
     <form class="card toolbar" @submit.prevent="applyFilters">

@@ -193,6 +193,19 @@ export const router = createRouter({
           meta: { permission: Permissions.PurchasesView, title: 'Compras' },
         },
         {
+          path: 'compras/nueva',
+          name: 'purchase-create',
+          component: () => import('@/modules/purchases/views/PurchaseFormView.vue'),
+          meta: { permission: Permissions.PurchasesCreate, title: 'Nueva compra' },
+        },
+        {
+          path: 'compras/:id(\\d+)/editar',
+          name: 'purchase-edit',
+          component: () => import('@/modules/purchases/views/PurchaseFormView.vue'),
+          props: (route) => ({ id: Number(route.params.id) }),
+          meta: { permission: Permissions.PurchasesManage, title: 'Editar compra' },
+        },
+        {
           path: 'compras/:id(\\d+)',
           name: 'purchase-detail',
           component: () => import('@/modules/purchases/views/PurchaseDetailView.vue'),
