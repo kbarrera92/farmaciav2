@@ -12,8 +12,8 @@ using Pharmacy.Infrastructure.Persistence;
 namespace Pharmacy.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261122041742_BranchNameAccentInsensitive")]
-    partial class BranchNameAccentInsensitive
+    [Migration("20261122042648_NamesAccentInsensitive")]
+    partial class NamesAccentInsensitive
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
