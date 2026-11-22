@@ -19,6 +19,10 @@ también se conserva (`CAJA CHICA` → `CAJA chica`).
 
 Siempre se quitan los espacios al inicio y al final.
 
+**Datos existentes:** las reglas solo se aplican al crear o editar. Las filas guardadas antes no se normalizan
+porque aún no hay datos reales. La importación desde el sistema original debe aplicar estas mismas reglas
+reutilizando `TextNormalizer` (decisión del usuario).
+
 ## 2. Comparación de nombres únicos
 
 Los nombres únicos (categorías, formas de pago, roles, sucursales) no distinguen mayúsculas ni tildes:
