@@ -32,6 +32,9 @@ export const Permissions = {
   SettingsManage: 'settings.manage',
   CatalogView: 'catalog.view',
   CatalogManage: 'catalog.manage',
+  PurchasesView: 'purchases.view',
+  PurchasesCreate: 'purchases.create',
+  PurchasesManage: 'purchases.manage',
 } as const
 
 export type PermissionCode = (typeof Permissions)[keyof typeof Permissions]
