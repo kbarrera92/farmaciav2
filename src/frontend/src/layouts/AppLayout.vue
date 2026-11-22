@@ -14,12 +14,17 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: 'Inicio', to: '/' },
-  { label: 'Usuarios', to: '/usuarios', permission: Permissions.UsersView },
-  { label: 'Roles y permisos', to: '/roles', permission: Permissions.RolesView },
-  { label: 'Sucursales', to: '/sucursales', permission: Permissions.BranchesView },
-  { label: 'Empresa', to: '/configuracion/empresa', permission: Permissions.SettingsView },
-  { label: 'Formas de pago', to: '/configuracion/formas-pago', permission: Permissions.SettingsView },
   { label: 'Categorías', to: '/catalogo/categorias', permission: Permissions.CatalogView, group: 'Catálogo' },
+  { label: 'Usuarios', to: '/usuarios', permission: Permissions.UsersView, group: 'Seguridad' },
+  { label: 'Roles y permisos', to: '/roles', permission: Permissions.RolesView, group: 'Seguridad' },
+  { label: 'Empresa', to: '/configuracion/empresa', permission: Permissions.SettingsView, group: 'Configuración' },
+  { label: 'Sucursales', to: '/sucursales', permission: Permissions.BranchesView, group: 'Configuración' },
+  {
+    label: 'Formas de pago',
+    to: '/configuracion/formas-pago',
+    permission: Permissions.SettingsView,
+    group: 'Configuración',
+  },
 ]
 
 const auth = useAuthStore()
