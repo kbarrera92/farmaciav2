@@ -10,3 +10,10 @@ export function formatDateTime(value: string | null | undefined): string {
   const date = new Date(iso)
   return Number.isNaN(date.getTime()) ? '—' : dateTimeFormatter.format(date)
 }
+
+const moneyFormatter = new Intl.NumberFormat('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+/** Formats an amount with thousands separators and two decimals. */
+export function formatMoney(value: number | null | undefined): string {
+  return value === null || value === undefined ? '—' : moneyFormatter.format(value)
+}

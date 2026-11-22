@@ -4,7 +4,7 @@ Paso 5 de la fase 1 (`docs/migration-dependencies.md` §4). Este documento recog
 original (`docs/database-schema.sql`) antes de implementar. Igual que en los módulos anteriores, la base
 nueva usa **tablas propias con FKs reales**; las tablas originales sirven solo como referencia.
 
-Estado: **en implementación**. Categorías, proveedores y productos implementados en backend; falta el frontend de productos. Las decisiones marcadas como Pendiente se confirman antes de implementar.
+Estado: **en implementación**. Categorías, proveedores y productos implementados. Las decisiones marcadas como Pendiente se confirman antes de implementar.
 
 ## 1. Tablas originales
 
