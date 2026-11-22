@@ -6,7 +6,7 @@ import AuditInfo from '@/components/AuditInfo.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { useAuthStore } from '@/modules/auth/stores/authStore'
 import { Permissions } from '@/modules/auth/types'
-import { errorMessage } from '@/services/http'
+import { ApiError, errorMessage } from '@/services/http'
 import { formatDate, formatDateTime, formatMoney } from '@/utils/format'
 import { purchaseService } from '../services/purchaseService'
 import { AccountPayableStatus, PurchaseType, purchaseTypeLabel, type PurchaseDetail } from '../types'
@@ -48,6 +48,36 @@ async function load(): Promise<void> {
   }
 }
 
+const cancelling = ref(false)
+const cancelReason = ref('')
+const cancelSaving = ref(false)
+const cancelError = ref<string | null>(null)
+const cancelFieldError = ref<string | undefined>()
+
+function openCancel(): void {
+  cancelReason.value = ''
+  cancelError.value = null
+  cancelFieldError.value = undefined
+  cancelling.value = true
+}
+
+async function confirmCancel(): Promise<void> {
+  if (!purchase.value) return
+  cancelError.value = null
+  cancelFieldError.value = undefined
+  cancelSaving.value = true
+  try {
+    purchase.value = await purchaseService.cancel(purchase.value.id, cancelReason.value)
+    cancelling.value = false
+    success.value = 'Compra anulada. El stock fue restado.'
+  } catch (e) {
+    cancelError.value = errorMessage(e)
+    if (e instanceof ApiError && e.status === 400) cancelFieldError.value = e.fieldError('reason')
+  } finally {
+    cancelSaving.value = false
+  }
+}
+
 onMounted(load)
 </script>
 
@@ -58,6 +88,9 @@ onMounted(load)
         <RouterLink v-if="canEdit" :to="{ name: 'purchase-edit', params: { id } }" class="btn btn-primary">
           Editar
         </RouterLink>
+        <button v-if="canEdit && !cancelling" type="button" class="btn btn-danger" @click="openCancel">
+          Anular
+        </button>
         <RouterLink :to="{ name: 'purchases' }" class="btn btn-secondary">Volver</RouterLink>
       </template>
     </PageHeader>
@@ -72,6 +105,37 @@ onMounted(load)
         <p v-if="hasCostWarning" class="alert alert-info">
           Hay productos cuyo costo de compra es mayor o igual al precio de venta de la sucursal.
         </p>
+
+        <form v-if="cancelling" class="card" novalidate @submit.prevent="confirmCancel">
+          <h2>Anular compra</h2>
+          <p class="muted">
+            Se restará del stock lo recibido en esta compra
+            <template v-if="purchase.accountPayable"> y se descartará su cuenta por pagar</template>. La compra queda
+            marcada como anulada y no se puede revertir.
+          </p>
+          <p v-if="cancelError" class="alert alert-error" role="alert">{{ cancelError }}</p>
+          <div class="field">
+            <label for="reason">Motivo</label>
+            <textarea
+              id="reason"
+              v-model="cancelReason"
+              class="textarea"
+              rows="3"
+              maxlength="250"
+              :disabled="cancelSaving"
+              :aria-invalid="!!cancelFieldError"
+            />
+            <p v-if="cancelFieldError" class="field-error">{{ cancelFieldError }}</p>
+          </div>
+          <div class="actions">
+            <button type="submit" class="btn btn-danger" :disabled="cancelSaving">
+              {{ cancelSaving ? 'Anulando…' : 'Confirmar anulación' }}
+            </button>
+            <button type="button" class="btn btn-secondary" :disabled="cancelSaving" @click="cancelling = false">
+              Cancelar
+            </button>
+          </div>
+        </form>
 
         <div class="card">
           <h2>Datos de la compra</h2>
