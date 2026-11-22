@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { computed, nextTick, onMounted, reactive, ref } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AsyncState from '@/components/AsyncState.vue'
 import AuditInfo from '@/components/AuditInfo.vue'
 import PageHeader from '@/components/PageHeader.vue'
@@ -28,6 +28,7 @@ const props = defineProps<{ id?: number }>()
 
 const auth = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 
 const isNew = computed(() => props.id === undefined)
 const canManage = auth.can(Permissions.CatalogManage)
@@ -63,8 +64,18 @@ const saving = ref(false)
 const error = ref<string | null>(null)
 const success = ref<string | null>(null)
 const fieldErrors = ref<Record<string, string | undefined>>({})
+const messages = ref<HTMLElement | null>(null)
 
-function toNumber(value: string): number | null {
+/** The form is long and messages render at the top: bring them into view. */
+async function revealMessages(): Promise<void> {
+  await nextTick()
+  messages.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+// v-model sobre <input type="number"> entrega number (o '' al vaciar), no siempre string.
+function toNumber(value: string | number | null | undefined): number | null {
+  if (value === null || value === undefined) return null
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null
   return value.trim() === '' ? null : Number(value)
 }
 
@@ -112,6 +123,11 @@ async function load(): Promise<void> {
     loadError.value = errorMessage(e)
   } finally {
     loading.value = false
+  }
+  if (!isNew.value && route.query.created === '1') {
+    success.value = 'Producto creado.'
+    await router.replace({ query: {} })
+    await revealMessages()
   }
 }
 
@@ -199,7 +215,7 @@ async function save(): Promise<void> {
     const request = buildRequest()
     if (isNew.value) {
       const created = await productService.create(request)
-      await router.replace({ name: 'product-edit', params: { id: created.id } })
+      await router.replace({ name: 'product-edit', params: { id: created.id }, query: { created: '1' } })
       return
     }
     setProduct(await productService.update(props.id!, request))
@@ -212,6 +228,7 @@ async function save(): Promise<void> {
   } finally {
     saving.value = false
   }
+  await revealMessages()
 }
 
 async function toggleStatus(): Promise<void> {
@@ -227,6 +244,7 @@ async function toggleStatus(): Promise<void> {
   } catch (e) {
     error.value = errorMessage(e)
   }
+  await revealMessages()
 }
 
 onMounted(load)
@@ -241,8 +259,10 @@ onMounted(load)
     </PageHeader>
 
     <AsyncState :loading="loading" :error="loadError" @retry="load">
-      <p v-if="success" class="alert alert-success" role="status">{{ success }}</p>
-      <p v-if="error" class="alert alert-error" role="alert">{{ error }}</p>
+      <div ref="messages">
+        <p v-if="success" class="alert alert-success" role="status">{{ success }}</p>
+        <p v-if="error" class="alert alert-error" role="alert">{{ error }}</p>
+      </div>
 
       <form class="card" novalidate @submit.prevent="save">
         <fieldset :disabled="!canManage || saving">
