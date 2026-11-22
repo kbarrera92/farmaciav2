@@ -7,6 +7,7 @@ using Pharmacy.Core.Common;
 using Pharmacy.Core.PaymentMethods;
 using Pharmacy.Core.Roles;
 using Pharmacy.Core.Settings;
+using Pharmacy.Core.Suppliers;
 using Pharmacy.Core.Users;
 
 namespace Pharmacy.Infrastructure.Persistence;
@@ -25,6 +26,7 @@ public sealed class AppDbContext(
     public DbSet<CompanySettings> CompanySettings => Set<CompanySettings>();
     public DbSet<PaymentMethod> PaymentMethods => Set<PaymentMethod>();
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Supplier> Suppliers => Set<Supplier>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

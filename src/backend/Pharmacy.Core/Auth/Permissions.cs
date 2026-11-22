@@ -29,8 +29,8 @@ public static class Permissions
         new(BranchesManage, "Administrar sucursales", "Sucursales", "Crear, editar y activar/desactivar sucursales."),
         new(SettingsView, "Ver configuración", "Configuración", "Consultar las formas de pago."),
         new(SettingsManage, "Administrar configuración", "Configuración", "Editar los datos y el logo de la empresa, y administrar las formas de pago."),
-        new(CatalogView, "Ver catálogo", "Catálogo", "Consultar las categorías del catálogo de productos."),
-        new(CatalogManage, "Administrar catálogo", "Catálogo", "Crear, editar y activar/desactivar categorías del catálogo de productos."),
+        new(CatalogView, "Ver catálogo", "Catálogo", "Consultar las categorías, proveedores y productos del catálogo."),
+        new(CatalogManage, "Administrar catálogo", "Catálogo", "Crear, editar y activar/desactivar categorías, proveedores y productos del catálogo."),
     ];
 
     public static IReadOnlySet<string> AllCodes { get; } = All.Select(p => p.Code).ToHashSet(StringComparer.Ordinal);

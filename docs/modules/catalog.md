@@ -4,7 +4,7 @@ Paso 5 de la fase 1 (`docs/migration-dependencies.md` §4). Este documento recog
 original (`docs/database-schema.sql`) antes de implementar. Igual que en los módulos anteriores, la base
 nueva usa **tablas propias con FKs reales**; las tablas originales sirven solo como referencia.
 
-Estado: **en implementación**. Categorías implementadas; el resto en análisis. Las decisiones marcadas como Pendiente se confirman antes de implementar.
+Estado: **en implementación**. Categorías y proveedores implementados; productos en análisis. Las decisiones marcadas como Pendiente se confirman antes de implementar.
 
 ## 1. Tablas originales
 
@@ -112,12 +112,15 @@ Observación: `verInventarioxsuc` y `verInventarioxsucfecha` devuelven `PROVEEDO
 | Categorías en productos | Al crear o editar un producto solo se ofrecen categorías activas. Un producto cuya categoría se desactiva la conserva. | Usuario |
 | Datos existentes | Se importarán después mediante script, con Id nuevos (no se conservan los originales). | Usuario (P-80) |
 | Estantería | **Ubicación por sucursal en texto libre** (p. ej. "A-3", "Vitrina 2"). Su objetivo es que el usuario sepa dónde buscar el producto en su sucursal. Sin catálogo ni pantalla de estanterías; se descarta `ESTANTERIA`. Dónde se guarda depende de P-77. | Usuario (P-75) |
+| Proveedores: campos | Todos los del original (`PROVEEDOR`): razón social (máx. 100), NIT, dirección, teléfono, correo, contacto y teléfono del contacto; opcionales salvo la razón social. Activo/inactivo y auditoría. Tabla nueva `Suppliers`. | Usuario (P-76) |
+| Proveedores: unicidad | Razón social única sin distinguir mayúsculas ni tildes (inactivos cuentan). NIT único cuando se informa (varios sin NIT permitidos). Distinto del original, sin restricciones. | Usuario |
+| Proveedores: baja | Solo desactivar. Un proveedor inactivo no se ofrece al crear o editar productos; el producto que ya lo tiene lo conserva. | Usuario |
 | Formato de textos | Ver `docs/data-conventions.md`. | Usuario |
 
 ## 5. Preguntas pendientes
 
 - **P-75 — Estantería:** resuelta (texto libre por sucursal, ver §4).
-- **P-76 — Proveedor del producto:** `PRODUCTO.proveedor` es obligatorio, pero proveedores es el paso 6. ¿Se implementa proveedores antes que productos, o el proveedor del producto pasa a ser opcional?
+- **P-76 — Proveedor del producto:** resuelta (se implementa antes que productos como catálogo simple, ver §4).
 - **P-77 — Existencias (RN-64):** en la base nueva, ¿se crea la fila de existencia de cada sucursal al crear el producto (y de cada producto al crear una sucursal), o se crea al primer movimiento y la ausencia cuenta como 0? Recomendación: crearla en el primer movimiento (incluida la compra) y tratar la ausencia como 0 en todas las consultas.
 - **P-78 — Estado del producto:** no existe en el original. ¿Se agrega activo/inactivo como en los demás módulos (no se borran productos con movimientos)?
 - **P-79 — Unicidad:** categoría resuelta (nombre único, ver §4). Pendiente: ¿código de barras único cuando se informa?

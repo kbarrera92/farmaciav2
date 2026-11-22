@@ -12,6 +12,7 @@ using Pharmacy.Core.Common;
 using Pharmacy.Core.PaymentMethods;
 using Pharmacy.Core.Roles;
 using Pharmacy.Core.Settings;
+using Pharmacy.Core.Suppliers;
 using Pharmacy.Core.Users;
 using Pharmacy.Infrastructure.Persistence;
 
@@ -64,6 +65,7 @@ public sealed class TestEnvironment : IDisposable
         CompanySettings = new CompanySettingsService(Db, Clock);
         PaymentMethods = new PaymentMethodService(Db);
         Categories = new CategoryService(Db);
+        Suppliers = new SupplierService(Db);
         Auth = new AuthService(Db, Hasher, PasswordPolicy, UserAccess,
             Options.Create(new LoginLockoutOptions { MaxFailedAttempts = 3, LockoutMinutes = 15 }),
             Clock, NullLogger<AuthService>.Instance);
@@ -83,6 +85,7 @@ public sealed class TestEnvironment : IDisposable
     public CompanySettingsService CompanySettings { get; }
     public PaymentMethodService PaymentMethods { get; }
     public CategoryService Categories { get; }
+    public SupplierService Suppliers { get; }
     public AuthService Auth { get; }
 
     public Role AdminRole { get; private set; } = null!;

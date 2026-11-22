@@ -34,7 +34,7 @@ En producción, la administración se publica en **`https://admin.farmaciahorro.
 - Consulta de existencias por sucursal (`Existencias`; `sp_infoProductos`, `sp_getStoc` como referencia).
 - Pendiente de confirmar: si al crear un producto se crea su fila en `Existencias` para cada sucursal (afecta compras, RN-64).
 
-### 3.4 Proveedores
+### 3.4 Proveedores — Implementado
 - Mantenimiento de `PROVEEDOR`. Se incluye porque compras y cuentas por pagar dependen de él.
 
 ### 3.5 Compras

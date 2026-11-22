@@ -107,14 +107,14 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                         new
                         {
                             Code = "catalog.view",
-                            Description = "Consultar las categorías del catálogo de productos.",
+                            Description = "Consultar las categorías, proveedores y productos del catálogo.",
                             Module = "Catálogo",
                             Name = "Ver catálogo"
                         },
                         new
                         {
                             Code = "catalog.manage",
-                            Description = "Crear, editar y activar/desactivar categorías del catálogo de productos.",
+                            Description = "Crear, editar y activar/desactivar categorías, proveedores y productos del catálogo.",
                             Module = "Catálogo",
                             Name = "Administrar catálogo"
                         });
@@ -378,6 +378,75 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Pharmacy.Core.Suppliers.Supplier", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("ContactName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ContactPhone")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(75)
+                        .HasColumnType("nvarchar(75)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .UseCollation("Modern_Spanish_100_CI_AI");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TaxId")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UpdatedByUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.HasIndex("TaxId")
+                        .IsUnique()
+                        .HasFilter("[TaxId] IS NOT NULL");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("Suppliers", (string)null);
+                });
+
             modelBuilder.Entity("Pharmacy.Core.Users.User", b =>
                 {
                     b.Property<int>("Id")
@@ -547,6 +616,23 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                 });
 
             modelBuilder.Entity("Pharmacy.Core.Settings.CompanySettings", b =>
+                {
+                    b.HasOne("Pharmacy.Core.Users.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Pharmacy.Core.Users.User", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("UpdatedBy");
+                });
+
+            modelBuilder.Entity("Pharmacy.Core.Suppliers.Supplier", b =>
                 {
                     b.HasOne("Pharmacy.Core.Users.User", "CreatedBy")
                         .WithMany()

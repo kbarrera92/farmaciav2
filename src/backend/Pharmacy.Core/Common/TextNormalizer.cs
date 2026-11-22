@@ -45,6 +45,9 @@ public static partial class TextNormalizer
     public static string? ToSentenceCaseOrNull(string? value) =>
         TrimToNull(value) is { } text ? ToSentenceCase(text) : null;
 
+    public static string? ToTitleCaseOrNull(string? value) =>
+        TrimToNull(value) is { } text ? ToTitleCase(text) : null;
+
     public static string? CapitalizeFirstOrNull(string? value) =>
         TrimToNull(value) is { } text ? CapitalizeFirst(text) : null;
 

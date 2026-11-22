@@ -7,6 +7,7 @@ using Pharmacy.Core.Categories;
 using Pharmacy.Core.PaymentMethods;
 using Pharmacy.Core.Roles;
 using Pharmacy.Core.Settings;
+using Pharmacy.Core.Suppliers;
 using Pharmacy.Core.Users;
 
 namespace Pharmacy.Core;
@@ -31,6 +32,7 @@ public static class DependencyInjection
         services.AddScoped<CompanySettingsService>();
         services.AddScoped<PaymentMethodService>();
         services.AddScoped<CategoryService>();
+        services.AddScoped<SupplierService>();
 
         return services;
     }

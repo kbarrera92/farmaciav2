@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Pharmacy.Core.Auth;
 using Pharmacy.Core.Categories;
+using Pharmacy.Core.Suppliers;
 
 namespace Pharmacy.IntegrationTests;
 
@@ -61,5 +62,44 @@ public sealed class CatalogApiTests : IDisposable
         var (other, _) = await _factory.CreateUserClientAsync(admin, "sinpermiso", Permissions.SettingsView);
 
         Assert.Equal(HttpStatusCode.Forbidden, (await other.GetAsync("/api/categories")).StatusCode);
+    }
+
+    [Fact]
+    public async Task Supplier_lifecycle_through_the_api()
+    {
+        var admin = await _factory.CreateAdminClientAsync();
+
+        var create = await admin.PostAsJsonAsync("/api/suppliers", new { name = "droguería norte", taxId = "1234567-8" });
+        Assert.Equal(HttpStatusCode.Created, create.StatusCode);
+        var supplier = (await create.Content.ReadFromJsonAsync<SupplierDto>())!;
+        Assert.Equal("Droguería Norte", supplier.Name);
+
+        Assert.Equal(HttpStatusCode.Conflict,
+            (await admin.PostAsJsonAsync("/api/suppliers", new { name = "DROGUERIA NORTE" })).StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict,
+            (await admin.PostAsJsonAsync("/api/suppliers", new { name = "Otra", taxId = "1234567-8" })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest,
+            (await admin.PostAsJsonAsync("/api/suppliers", new { name = "" })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest,
+            (await admin.PostAsJsonAsync("/api/suppliers", new { name = "Con correo malo", email = "no-es-correo" })).StatusCode);
+
+        (await admin.PatchAsJsonAsync($"/api/suppliers/{supplier.Id}/status", new { isActive = false })).EnsureSuccessStatusCode();
+        Assert.Empty((await admin.GetFromJsonAsync<List<SupplierDto>>("/api/suppliers"))!);
+        Assert.Single((await admin.GetFromJsonAsync<List<SupplierDto>>("/api/suppliers?includeInactive=true"))!);
+    }
+
+    [Fact]
+    public async Task Catalog_view_can_read_suppliers_but_not_change_them()
+    {
+        var admin = await _factory.CreateAdminClientAsync();
+        var supplier = await (await admin.PostAsJsonAsync("/api/suppliers", new { name = "Distribuidora Sur" }))
+            .Content.ReadFromJsonAsync<SupplierDto>();
+        var (viewer, _) = await _factory.CreateUserClientAsync(admin, "consultaprov", Permissions.CatalogView);
+
+        Assert.Equal(HttpStatusCode.OK, (await viewer.GetAsync("/api/suppliers")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden,
+            (await viewer.PostAsJsonAsync("/api/suppliers", new { name = "Otro" })).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden,
+            (await viewer.PatchAsJsonAsync($"/api/suppliers/{supplier!.Id}/status", new { isActive = false })).StatusCode);
     }
 }
