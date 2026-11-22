@@ -61,8 +61,8 @@ npm run dev
 ## Compilación y pruebas
 
 ```bash
-dotnet build Pharmacy.sln
-dotnet test Pharmacy.sln
+dotnet build Pharmacy.slnx
+dotnet test Pharmacy.slnx
 cd src/frontend && npm run build   # compila la SPA en src/backend/Pharmacy.Api/wwwroot
 ```
 
