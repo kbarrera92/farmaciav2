@@ -36,7 +36,7 @@ En producción, la administración se publica en **`https://admin.farmaciahorro.
 ### 3.4 Proveedores — Implementado
 - Mantenimiento de `PROVEEDOR`. Se incluye porque compras y cuentas por pagar dependen de él.
 
-### 3.5 Compras — En análisis (`docs/modules/purchases.md`)
+### 3.5 Compras — Análisis cerrado (`docs/modules/purchases.md`)
 - Registro y consulta de compras: `COMPRA`, `DETALLECOMPRA` (`getCompras`, `getDetalleCompra`, `sp_infoProdCompras` como referencia).
 - Suma de existencias por trigger `trg_ActualizarExistencias_Compra` (la API no debe duplicarla); totales mantenidos por `TR_updateTotalActualizarC` y `TR_actualizartotalBorrarC`.
 - Tabla de existencias y su consulta por sucursal (movida desde el catálogo; `Existencias`, `sp_infoProdCompras`, `sp_getStoc` como referencia).
