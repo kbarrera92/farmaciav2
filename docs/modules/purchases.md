@@ -4,7 +4,7 @@ Paso 7 de la fase 1 (`docs/migration-dependencies.md` §4). Este documento recog
 original (`docs/database-schema.sql`) antes de implementar. Igual que en los módulos anteriores, la base
 nueva usa **tablas propias con FKs reales**; las tablas originales sirven solo como referencia.
 
-Estado: **análisis cerrado**. Backend implementado (tablas, permisos, compras y consulta de existencias). Frontend pendiente. P-81 a P-88 respondidas.
+Estado: **análisis cerrado**. Backend y frontend implementados (tablas, permisos, compras, anulación y consulta de existencias). P-81 a P-88 respondidas.
 
 Este módulo incluye también la **tabla de existencias** y su **consulta por sucursal**, que quedaron fuera del
 catálogo: la compra es el primer movimiento que genera stock (P-77, `docs/modules/catalog.md` §4).
