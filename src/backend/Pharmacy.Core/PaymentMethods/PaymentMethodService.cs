@@ -20,7 +20,7 @@ public sealed class PaymentMethodService(IAppDbContext db)
 
     public async Task<PaymentMethodDto> CreateAsync(SavePaymentMethodRequest request, CancellationToken ct = default)
     {
-        var name = request.Name.Trim();
+        var name = TextNormalizer.ToSentenceCase(request.Name);
         await EnsureUniqueNameAsync(name, excludeId: null, ct);
 
         var paymentMethod = new PaymentMethod { Name = name };
@@ -33,7 +33,7 @@ public sealed class PaymentMethodService(IAppDbContext db)
     public async Task<PaymentMethodDto> UpdateAsync(int id, SavePaymentMethodRequest request, CancellationToken ct = default)
     {
         var paymentMethod = await db.PaymentMethods.FirstOrDefaultAsync(p => p.Id == id, ct) ?? throw NotFound();
-        var name = request.Name.Trim();
+        var name = TextNormalizer.ToSentenceCase(request.Name);
         await EnsureUniqueNameAsync(name, excludeId: id, ct);
 
         paymentMethod.Name = name;

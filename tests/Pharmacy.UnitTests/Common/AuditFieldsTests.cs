@@ -41,7 +41,7 @@ public sealed class AuditFieldsTests : IDisposable
         Assert.Equal(created, updated.Audit.CreatedAtUtc);
         Assert.Equal("Administrador", updated.Audit.CreatedBy);
         Assert.Equal(_env.Clock.Now.UtcDateTime, updated.Audit.UpdatedAtUtc);
-        Assert.Equal("Usuario editor", updated.Audit.UpdatedBy);
+        Assert.Equal("Usuario Editor", updated.Audit.UpdatedBy);
     }
 
     [Fact]

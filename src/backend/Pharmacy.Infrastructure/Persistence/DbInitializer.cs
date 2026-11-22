@@ -59,13 +59,17 @@ public sealed class DbInitializer(
         var branch = await db.Branches.OrderBy(b => b.Id).FirstOrDefaultAsync(ct);
         if (branch is null)
         {
-            branch = new Branch { Name = settings.BranchName, Address = settings.BranchAddress };
+            branch = new Branch
+            {
+                Name = TextNormalizer.ToSentenceCase(settings.BranchName),
+                Address = TextNormalizer.CapitalizeFirst(settings.BranchAddress),
+            };
             db.Branches.Add(branch);
         }
 
         var admin = new User
         {
-            FullName = settings.FullName,
+            FullName = TextNormalizer.ToTitleCase(settings.FullName),
             Username = settings.Username.Trim(),
             NormalizedUsername = TextNormalizer.Normalize(settings.Username),
             Role = role,

@@ -32,8 +32,8 @@ public sealed class PaymentMethodServiceTests : IDisposable
         var cash = await Create("Contado");
         var credit = await Create("Crédito");
 
-        var renamed = await _env.PaymentMethods.UpdateAsync(cash.Id, new SavePaymentMethodRequest { Name = "contado" });
-        Assert.Equal("contado", renamed.Name);
+        var renamed = await _env.PaymentMethods.UpdateAsync(cash.Id, new SavePaymentMethodRequest { Name = "CONTADO" });
+        Assert.Equal("Contado", renamed.Name);
 
         await Assert.ThrowsAsync<ConflictException>(
             () => _env.PaymentMethods.UpdateAsync(credit.Id, new SavePaymentMethodRequest { Name = "Contado" }));

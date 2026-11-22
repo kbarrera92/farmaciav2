@@ -32,9 +32,9 @@ public sealed class CompanySettingsService(IAppDbContext db, TimeProvider timePr
             db.CompanySettings.Add(settings);
         }
 
-        settings.Name = request.Name.Trim();
+        settings.Name = TextNormalizer.ToTitleCase(request.Name);
         settings.TaxId = TextNormalizer.TrimToNull(request.TaxId);
-        settings.Address = TextNormalizer.TrimToNull(request.Address);
+        settings.Address = TextNormalizer.CapitalizeFirstOrNull(request.Address);
         settings.Phone = TextNormalizer.TrimToNull(request.Phone);
         settings.Email = TextNormalizer.TrimToNull(request.Email);
         await db.SaveChangesAsync(ct);

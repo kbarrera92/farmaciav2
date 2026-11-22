@@ -37,8 +37,8 @@ public sealed class CategoryServiceTests : IDisposable
         var analgesics = await Create("Analgésicos");
         var antibiotics = await Create("Antibióticos");
 
-        var renamed = await _env.Categories.UpdateAsync(analgesics.Id, new SaveCategoryRequest { Name = "analgesicos" });
-        Assert.Equal("analgesicos", renamed.Name);
+        var renamed = await _env.Categories.UpdateAsync(analgesics.Id, new SaveCategoryRequest { Name = "ANALGESICOS" });
+        Assert.Equal("Analgesicos", renamed.Name);
 
         await Assert.ThrowsAsync<ConflictException>(
             () => _env.Categories.UpdateAsync(antibiotics.Id, new SaveCategoryRequest { Name = "ANALGÉSICOS" }));

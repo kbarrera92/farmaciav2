@@ -20,7 +20,7 @@ public sealed class CategoryService(IAppDbContext db)
 
     public async Task<CategoryDto> CreateAsync(SaveCategoryRequest request, CancellationToken ct = default)
     {
-        var name = request.Name.Trim();
+        var name = TextNormalizer.ToSentenceCase(request.Name);
         await EnsureUniqueNameAsync(name, excludeId: null, ct);
 
         var category = new Category { Name = name };
@@ -33,7 +33,7 @@ public sealed class CategoryService(IAppDbContext db)
     public async Task<CategoryDto> UpdateAsync(int id, SaveCategoryRequest request, CancellationToken ct = default)
     {
         var category = await db.Categories.FirstOrDefaultAsync(c => c.Id == id, ct) ?? throw NotFound();
-        var name = request.Name.Trim();
+        var name = TextNormalizer.ToSentenceCase(request.Name);
         await EnsureUniqueNameAsync(name, excludeId: id, ct);
 
         category.Name = name;

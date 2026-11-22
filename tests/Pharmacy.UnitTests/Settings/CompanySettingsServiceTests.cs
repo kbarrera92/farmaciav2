@@ -36,7 +36,7 @@ public sealed class CompanySettingsServiceTests : IDisposable
         });
 
         Assert.True(updated.IsConfigured);
-        Assert.Equal("Farmacia del Ahorro", updated.Name);
+        Assert.Equal("Farmacia Del Ahorro", updated.Name);
         Assert.Equal("1234567-8", updated.TaxId);
         Assert.Equal(1, await _env.Db.CompanySettings.CountAsync());
     }

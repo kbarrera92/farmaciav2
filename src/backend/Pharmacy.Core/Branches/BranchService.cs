@@ -43,13 +43,13 @@ public sealed class BranchService(IAppDbContext db)
 
     public async Task<BranchDto> CreateAsync(SaveBranchRequest request, CancellationToken ct = default)
     {
-        var name = request.Name.Trim();
+        var name = TextNormalizer.ToSentenceCase(request.Name);
         await EnsureUniqueNameAsync(name, excludeId: null, ct);
 
         var branch = new Branch
         {
             Name = name,
-            Address = request.Address.Trim(),
+            Address = TextNormalizer.CapitalizeFirst(request.Address),
             Phone = TextNormalizer.TrimToNull(request.Phone),
         };
         db.Branches.Add(branch);
@@ -61,11 +61,11 @@ public sealed class BranchService(IAppDbContext db)
     public async Task<BranchDto> UpdateAsync(int id, SaveBranchRequest request, CancellationToken ct = default)
     {
         var branch = await db.Branches.FirstOrDefaultAsync(b => b.Id == id, ct) ?? throw NotFound();
-        var name = request.Name.Trim();
+        var name = TextNormalizer.ToSentenceCase(request.Name);
         await EnsureUniqueNameAsync(name, excludeId: id, ct);
 
         branch.Name = name;
-        branch.Address = request.Address.Trim();
+        branch.Address = TextNormalizer.CapitalizeFirst(request.Address);
         branch.Phone = TextNormalizer.TrimToNull(request.Phone);
         await db.SaveChangesAsync(ct);
 

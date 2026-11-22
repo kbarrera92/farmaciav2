@@ -54,14 +54,14 @@ public sealed class RoleService(IAppDbContext db, UserAccessService userAccess)
 
     public async Task<RoleDetailDto> CreateAsync(SaveRoleRequest request, CancellationToken ct = default)
     {
-        var name = request.Name.Trim();
+        var name = TextNormalizer.ToSentenceCase(request.Name);
         await EnsureUniqueNameAsync(name, excludeId: null, ct);
         var codes = ValidatePermissionCodes(request.Permissions);
 
         var role = new Role
         {
             Name = name,
-            Description = TextNormalizer.TrimToNull(request.Description),
+            Description = TextNormalizer.ToSentenceCaseOrNull(request.Description),
             Permissions = codes.Select(c => new RolePermission { PermissionCode = c }).ToList(),
         };
         db.Roles.Add(role);
@@ -76,12 +76,12 @@ public sealed class RoleService(IAppDbContext db, UserAccessService userAccess)
             ?? throw NotFound();
         EnsureNotSystem(role);
 
-        var name = request.Name.Trim();
+        var name = TextNormalizer.ToSentenceCase(request.Name);
         await EnsureUniqueNameAsync(name, excludeId: id, ct);
         var codes = ValidatePermissionCodes(request.Permissions);
 
         role.Name = name;
-        role.Description = TextNormalizer.TrimToNull(request.Description);
+        role.Description = TextNormalizer.ToSentenceCaseOrNull(request.Description);
         role.Permissions.RemoveAll(p => !codes.Contains(p.PermissionCode));
         foreach (var code in codes.Where(c => role.Permissions.All(p => p.PermissionCode != c)))
             role.Permissions.Add(new RolePermission { RoleId = role.Id, PermissionCode = code });

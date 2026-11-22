@@ -75,7 +75,7 @@ public sealed class UserService(
 
         var user = new User
         {
-            FullName = request.FullName.Trim(),
+            FullName = TextNormalizer.ToTitleCase(request.FullName),
             Username = username,
             NormalizedUsername = TextNormalizer.Normalize(username),
             RoleId = request.RoleId.Value,
@@ -107,7 +107,7 @@ public sealed class UserService(
         if (branchId != user.BranchId)
             await EnsureActiveBranchAsync(branchId, ct);
 
-        user.FullName = request.FullName.Trim();
+        user.FullName = TextNormalizer.ToTitleCase(request.FullName);
         user.Username = username;
         user.NormalizedUsername = TextNormalizer.Normalize(username);
         user.RoleId = roleId;

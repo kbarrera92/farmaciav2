@@ -88,7 +88,7 @@ public sealed class SettingsApiTests : IDisposable
 
         Assert.Equal("Administrador", created.Audit.CreatedBy);
         Assert.Equal("Administrador", updated!.Audit.CreatedBy);
-        Assert.Equal("Usuario gestor", updated.Audit.UpdatedBy);
+        Assert.Equal("Usuario Gestor", updated.Audit.UpdatedBy);
     }
 
     private static MultipartFormDataContent LogoForm(byte[] bytes, string declaredType)
