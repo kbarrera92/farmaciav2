@@ -4,7 +4,7 @@ Paso 7 de la fase 1 (`docs/migration-dependencies.md` §4). Este documento recog
 original (`docs/database-schema.sql`) antes de implementar. Igual que en los módulos anteriores, la base
 nueva usa **tablas propias con FKs reales**; las tablas originales sirven solo como referencia.
 
-Estado: **análisis**. Nada implementado. Las decisiones marcadas como Pendiente se confirman antes de implementar.
+Estado: **análisis**. Nada implementado. P-81 a P-88 respondidas, con puntos sueltos en §5. Las decisiones marcadas como Pendiente se confirman antes de implementar.
 
 Este módulo incluye también la **tabla de existencias** y su **consulta por sucursal**, que quedaron fuera del
 catálogo: la compra es el primer movimiento que genera stock (P-77, `docs/modules/catalog.md` §4).
@@ -74,19 +74,31 @@ Heredadas del catálogo (ya resueltas):
 | Tema | Decisión | Origen |
 |---|---|---|
 | Existencias | La fila de existencia se crea con el primer movimiento, incluida la compra; la ausencia cuenta como 0. | Usuario (P-77) |
-| Proveedores y productos inactivos | Un proveedor inactivo no se ofrece al crear; un producto inactivo no se ofrece en compras (a confirmar en P-85). | `catalog.md` §4 |
+| Proveedores inactivos | Un proveedor inactivo no se ofrece al crear una compra. | `catalog.md` §4 |
 | Datos existentes | Se importan después mediante script, con Id nuevos. | Usuario (P-80) |
 
-No hay decisiones nuevas todavía.
+De este módulo:
+
+| Tema | Decisión | Origen |
+|---|---|---|
+| Compra al crédito | La compra al crédito es la que tiene cuenta por pagar. | Usuario (P-81) |
+| Documento | `documento` es el número de factura entregado por el proveedor. | Usuario (P-82) |
+| Editar y anular | Solo el administrador, dejando auditoría, y el stock se ajusta en consecuencia. | Usuario (P-83) |
+| Costo del producto | Registrar una compra **no** actualiza `Products.Cost`. | Usuario (P-84) |
+| Productos elegibles | Se pueden comprar productos de cualquier proveedor. | Usuario (P-85) |
+| Quién registra | El administrador registra compras; el permiso se puede asignar a otros roles (p. ej. bodeguero). | Usuario (P-86) |
+| Stock negativo | La tabla de existencias admite stock negativo, como el original (RN-62). | Usuario (P-87) |
+| Consulta de existencias | Va en el módulo de compras, con filtros por sucursal y categoría. | Usuario (P-88) |
 
 ## 5. Preguntas pendientes
 
-- **P-81 — Contado y crédito:** `COMPRA.formaPago` apunta al catálogo de formas de pago (efectivo, tarjeta...) y `CUENTAXPAGAR.idCompra` enlaza una cuenta con la compra. ¿Una compra al crédito es la que tiene cuenta por pagar? ¿Cómo se distingue (forma de pago especial, `fechaPago` nula)? ¿Qué significa `fechaPago` en la compra?
-- **P-82 — Documento:** `documento` es obligatorio y numérico (bigint). ¿Es el número de factura del proveedor? ¿Debe ser único por proveedor?
-- **P-83 — Editar o anular:** el original solo ajusta el stock al insertar líneas. ¿Se permite editar o eliminar una compra registrada? Si sí, ¿se revierte el stock? ¿O solo se anula y se corrige con un ajuste de inventario?
-- **P-84 — Costo del producto:** ¿registrar una compra actualiza el costo del producto (`Products.Cost`)? ¿Qué pasa si el precio de compra es mayor o igual al precio de venta (el catálogo exige precio > costo)?
-- **P-85 — Productos elegibles:** ¿se pueden comprar productos de cualquier proveedor en una compra o solo los del proveedor elegido? ¿Y productos inactivos?
-- **P-86 — Sucursal y permisos:** ¿quién registra compras (administración o cada sucursal) y para cuál sucursal? ¿Permisos nuevos `purchases.view` y `purchases.manage`?
-- **P-87 — Stock negativo:** la tabla nueva de existencias, ¿admite negativos (RN-62, R-06) o se valida en ventas, ajustes y traslados?
-- **P-88 — Consulta de existencias:** ¿qué columnas y filtros necesita (sucursal, categoría, proveedor, solo bajo stock mínimo)? ¿Es parte de este módulo o va con reportes?
+Resueltas: P-81 a P-88 (ver §4). Quedan estos puntos sueltos de esas preguntas:
+
+- **P-81 (resto):** ¿cómo se distingue la compra al crédito (forma de pago "crédito" o campo contado/crédito)? ¿Qué significa `fechaPago` en la compra? ¿La cuenta por pagar se crea automáticamente al registrar la compra?
+- **P-82 (resto):** ¿`documento` debe ser único por proveedor?
+- **P-83 (resto):** ¿se permiten editar y anular, o solo una? Si hay anulación, ¿la compra queda marcada como anulada o se borra? ¿Qué pasa si la cuenta por pagar ya tiene abonos? (depende de P-81)
+- **P-84 (resto):** si el precio de compra es mayor o igual al precio de venta, ¿se permite, se avisa o se bloquea?
+- **P-85 (resto):** ¿se pueden comprar productos inactivos?
+- **P-86 (resto):** permisos propuestos: `purchases.view`, `purchases.create` y `purchases.manage` (editar y anular, solo administrador). ¿Sucursal de la compra: la del usuario o la elige el usuario?
+- **P-88 (resto):** columnas de la consulta de existencias (propuesta: producto, categoría, existencia, stock mínimo de la sucursal) y si incluye un filtro de bajo stock mínimo.
 - **P-74** (ya registrada): productos sin fila en `Existencias` o con stock negativo en los datos actuales.
