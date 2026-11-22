@@ -8,6 +8,8 @@ interface NavItem {
   label: string
   to: string
   permission?: PermissionCode
+  /** Section title shown above the first visible item of the group. */
+  group?: string
 }
 
 const navItems: NavItem[] = [
@@ -17,6 +19,7 @@ const navItems: NavItem[] = [
   { label: 'Sucursales', to: '/sucursales', permission: Permissions.BranchesView },
   { label: 'Empresa', to: '/configuracion/empresa', permission: Permissions.SettingsView },
   { label: 'Formas de pago', to: '/configuracion/formas-pago', permission: Permissions.SettingsView },
+  { label: 'Categorías', to: '/catalogo/categorias', permission: Permissions.CatalogView, group: 'Catálogo' },
 ]
 
 const auth = useAuthStore()
@@ -25,6 +28,11 @@ const route = useRoute()
 const menuOpen = ref(false)
 
 const visibleItems = computed(() => navItems.filter((item) => !item.permission || auth.can(item.permission)))
+
+function startsGroup(index: number): boolean {
+  const group = visibleItems.value[index].group
+  return !!group && visibleItems.value[index - 1]?.group !== group
+}
 
 watch(
   () => route.fullPath,
@@ -49,15 +57,12 @@ async function logout(): Promise<void> {
         <span>Farmacia</span>
       </div>
       <nav aria-label="Menú principal">
-        <RouterLink
-          v-for="item in visibleItems"
-          :key="item.to"
-          :to="item.to"
-          class="nav-link"
-          :class="{ active: isActive(item) }"
-        >
-          {{ item.label }}
-        </RouterLink>
+        <template v-for="(item, index) in visibleItems" :key="item.to">
+          <p v-if="startsGroup(index)" class="nav-group">{{ item.group }}</p>
+          <RouterLink :to="item.to" class="nav-link" :class="{ active: isActive(item) }">
+            {{ item.label }}
+          </RouterLink>
+        </template>
       </nav>
     </aside>
 
@@ -130,6 +135,16 @@ nav {
   color: var(--color-sidebar-text);
   text-decoration: none;
   font-weight: 500;
+}
+
+.nav-group {
+  margin: 1rem 0 0.25rem;
+  padding: 0 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.6;
 }
 
 .nav-link:hover {

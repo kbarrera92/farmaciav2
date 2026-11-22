@@ -30,6 +30,8 @@ export const Permissions = {
   BranchesManage: 'branches.manage',
   SettingsView: 'settings.view',
   SettingsManage: 'settings.manage',
+  CatalogView: 'catalog.view',
+  CatalogManage: 'catalog.manage',
 } as const
 
 export type PermissionCode = (typeof Permissions)[keyof typeof Permissions]

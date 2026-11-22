@@ -1,0 +1,148 @@
+<script setup lang="ts">
+import { computed, onMounted, reactive, ref } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
+import AsyncState from '@/components/AsyncState.vue'
+import AuditInfo from '@/components/AuditInfo.vue'
+import PageHeader from '@/components/PageHeader.vue'
+import StatusBadge from '@/components/StatusBadge.vue'
+import { useAuthStore } from '@/modules/auth/stores/authStore'
+import { Permissions } from '@/modules/auth/types'
+import { ApiError, errorMessage } from '@/services/http'
+import { categoryService } from '../services/categoryService'
+import type { Category } from '../types'
+
+const props = defineProps<{ id?: number }>()
+
+const auth = useAuthStore()
+const router = useRouter()
+
+const isNew = computed(() => props.id === undefined)
+const canManage = auth.can(Permissions.CatalogManage)
+
+const category = ref<Category | null>(null)
+const form = reactive({ name: '' })
+
+const loading = ref(false)
+const loadError = ref<string | null>(null)
+const saving = ref(false)
+const error = ref<string | null>(null)
+const success = ref<string | null>(null)
+const nameError = ref<string | undefined>()
+
+async function load(): Promise<void> {
+  if (isNew.value) return
+  loading.value = true
+  loadError.value = null
+  try {
+    setCategory(await categoryService.get(props.id!))
+  } catch (e) {
+    loadError.value = errorMessage(e)
+  } finally {
+    loading.value = false
+  }
+}
+
+function setCategory(detail: Category): void {
+  category.value = detail
+  form.name = detail.name
+}
+
+async function save(): Promise<void> {
+  error.value = null
+  success.value = null
+  nameError.value = undefined
+  saving.value = true
+  try {
+    const request = { name: form.name }
+    if (isNew.value) {
+      const created = await categoryService.create(request)
+      await router.replace({ name: 'category-edit', params: { id: created.id } })
+      return
+    }
+    setCategory(await categoryService.update(props.id!, request))
+    success.value = 'Cambios guardados.'
+  } catch (e) {
+    error.value = errorMessage(e)
+    if (e instanceof ApiError && e.status === 400) nameError.value = e.fieldError('name')
+  } finally {
+    saving.value = false
+  }
+}
+
+async function toggleStatus(): Promise<void> {
+  if (!category.value) return
+  const activate = !category.value.isActive
+  const name = category.value.name
+  if (!window.confirm(activate ? `¿Activar la categoría ${name}?` : `¿Desactivar la categoría ${name}?`)) return
+  error.value = null
+  success.value = null
+  try {
+    setCategory(await categoryService.setStatus(category.value.id, activate))
+    success.value = activate ? 'Categoría activada.' : 'Categoría desactivada.'
+  } catch (e) {
+    error.value = errorMessage(e)
+  }
+}
+
+onMounted(load)
+</script>
+
+<template>
+  <section class="page">
+    <PageHeader :title="isNew ? 'Nueva categoría' : (category?.name ?? 'Categoría')">
+      <template #actions>
+        <RouterLink :to="{ name: 'categories' }" class="btn btn-secondary">Volver</RouterLink>
+      </template>
+    </PageHeader>
+
+    <AsyncState :loading="loading" :error="loadError" @retry="load">
+      <p v-if="success" class="alert alert-success" role="status">{{ success }}</p>
+      <p v-if="error" class="alert alert-error" role="alert">{{ error }}</p>
+
+      <form class="card" novalidate @submit.prevent="save">
+        <fieldset :disabled="!canManage || saving" class="form-grid">
+          <div class="field">
+            <label for="name">Nombre</label>
+            <input id="name" v-model="form.name" class="input" maxlength="50" :aria-invalid="!!nameError" />
+            <p v-if="nameError" class="field-error">{{ nameError }}</p>
+          </div>
+        </fieldset>
+
+        <div class="footer">
+          <span v-if="category" class="muted small"><StatusBadge :active="category.isActive" /></span>
+          <div v-if="canManage" class="actions">
+            <button v-if="category" type="button" class="btn btn-secondary" @click="toggleStatus">
+              {{ category.isActive ? 'Desactivar' : 'Activar' }}
+            </button>
+            <button type="submit" class="btn btn-primary" :disabled="saving">
+              {{ saving ? 'Guardando…' : isNew ? 'Crear categoría' : 'Guardar cambios' }}
+            </button>
+          </div>
+        </div>
+        <AuditInfo v-if="category" :audit="category.audit" />
+      </form>
+    </AsyncState>
+  </section>
+</template>
+
+<style scoped>
+fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.25rem;
+}
+
+.footer .actions {
+  margin-left: auto;
+}
+</style>
