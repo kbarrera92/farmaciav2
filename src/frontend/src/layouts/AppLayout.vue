@@ -18,6 +18,7 @@ const navItems: NavItem[] = [
   { label: 'Categorías', to: '/catalogo/categorias', permission: Permissions.CatalogView, group: 'Catálogo' },
   { label: 'Proveedores', to: '/catalogo/proveedores', permission: Permissions.CatalogView, group: 'Catálogo' },
   { label: 'Compras', to: '/compras', permission: Permissions.PurchasesView, group: 'Compras' },
+  { label: 'Existencias', to: '/compras/existencias', permission: Permissions.PurchasesView, group: 'Compras' },
   { label: 'Usuarios', to: '/usuarios', permission: Permissions.UsersView, group: 'Seguridad' },
   { label: 'Roles y permisos', to: '/roles', permission: Permissions.RolesView, group: 'Seguridad' },
   { label: 'Empresa', to: '/configuracion/empresa', permission: Permissions.SettingsView, group: 'Configuración' },
@@ -48,7 +49,12 @@ watch(
 )
 
 function isActive(item: NavItem): boolean {
-  return item.to === '/' ? route.path === '/' : route.path.startsWith(item.to)
+  if (item.to === '/') return route.path === '/'
+  // A more specific sibling (e.g. /compras/existencias vs /compras) takes the highlight.
+  const moreSpecific = navItems.some(
+    (other) => other.to.length > item.to.length && other.to.startsWith(item.to) && route.path.startsWith(other.to),
+  )
+  return route.path.startsWith(item.to) && !moreSpecific
 }
 
 async function logout(): Promise<void> {

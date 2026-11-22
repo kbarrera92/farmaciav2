@@ -193,6 +193,12 @@ export const router = createRouter({
           meta: { permission: Permissions.PurchasesView, title: 'Compras' },
         },
         {
+          path: 'compras/existencias',
+          name: 'stocks',
+          component: () => import('@/modules/purchases/views/StockListView.vue'),
+          meta: { permission: Permissions.PurchasesView, title: 'Existencias' },
+        },
+        {
           path: 'compras/nueva',
           name: 'purchase-create',
           component: () => import('@/modules/purchases/views/PurchaseFormView.vue'),

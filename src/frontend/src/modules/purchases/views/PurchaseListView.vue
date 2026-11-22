@@ -72,6 +72,7 @@ onMounted(async () => {
   <section class="page">
     <PageHeader title="Compras" subtitle="Compras a proveedores registradas por sucursal.">
       <template #actions>
+        <RouterLink :to="{ name: 'stocks' }" class="btn btn-secondary">Existencias</RouterLink>
         <RouterLink v-if="canCreate" :to="{ name: 'purchase-create' }" class="btn btn-primary">
           Nueva compra
         </RouterLink>
