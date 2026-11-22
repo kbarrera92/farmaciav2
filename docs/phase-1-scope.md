@@ -36,11 +36,11 @@ En producción, la administración se publica en **`https://admin.farmaciahorro.
 ### 3.4 Proveedores — Implementado
 - Mantenimiento de `PROVEEDOR`. Se incluye porque compras y cuentas por pagar dependen de él.
 
-### 3.5 Compras — Análisis cerrado (`docs/modules/purchases.md`)
+### 3.5 Compras — Backend implementado, frontend pendiente (`docs/modules/purchases.md`)
 - Registro y consulta de compras: `COMPRA`, `DETALLECOMPRA` (`getCompras`, `getDetalleCompra`, `sp_infoProdCompras` como referencia).
-- Suma de existencias por trigger `trg_ActualizarExistencias_Compra` (la API no debe duplicarla); totales mantenidos por `TR_updateTotalActualizarC` y `TR_actualizartotalBorrarC`.
+- Las existencias y el total de la compra los mantiene la API dentro de la misma transacción (en la base nueva no hay triggers).
 - Tabla de existencias y su consulta por sucursal (movida desde el catálogo; `Existencias`, `sp_infoProdCompras`, `sp_getStoc` como referencia).
-- Pendiente de confirmar: relación exacta entre compra y cuenta por pagar (compra al crédito / contado).
+- Compra al contado o al crédito; la de crédito crea su cuenta por pagar (tabla mínima, sin abonos hasta el módulo 3.6).
 
 ### 3.6 Cuentas por pagar
 - Consulta y gestión de `CUENTAXPAGAR`, `DETALLECXP`, `ESTADOCXP` (`sp_vercxp`, `sp_vercxpxmes`, `sp_verDetallesCxP` como referencia).

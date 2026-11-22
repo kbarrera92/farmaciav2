@@ -14,6 +14,7 @@ using Pharmacy.Core.Products;
 using Pharmacy.Core.Purchases;
 using Pharmacy.Core.Roles;
 using Pharmacy.Core.Settings;
+using Pharmacy.Core.Stocks;
 using Pharmacy.Core.Suppliers;
 using Pharmacy.Core.Users;
 using Pharmacy.Infrastructure.Persistence;
@@ -70,6 +71,7 @@ public sealed class TestEnvironment : IDisposable
         Suppliers = new SupplierService(Db);
         Products = new ProductService(Db);
         Purchases = new PurchaseService(Db, CurrentUser, Clock, Options.Create(new BusinessOptions()));
+        Stocks = new StockService(Db);
         Auth = new AuthService(Db, Hasher, PasswordPolicy, UserAccess,
             Options.Create(new LoginLockoutOptions { MaxFailedAttempts = 3, LockoutMinutes = 15 }),
             Clock, NullLogger<AuthService>.Instance);
@@ -92,6 +94,7 @@ public sealed class TestEnvironment : IDisposable
     public SupplierService Suppliers { get; }
     public ProductService Products { get; }
     public PurchaseService Purchases { get; }
+    public StockService Stocks { get; }
     public AuthService Auth { get; }
 
     public Role AdminRole { get; private set; } = null!;

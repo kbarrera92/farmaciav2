@@ -6,6 +6,7 @@ using Pharmacy.Core.Common;
 using Pharmacy.Core.PaymentMethods;
 using Pharmacy.Core.Products;
 using Pharmacy.Core.Purchases;
+using Pharmacy.Core.Stocks;
 using Pharmacy.Core.Suppliers;
 
 namespace Pharmacy.IntegrationTests;
@@ -91,6 +92,26 @@ public sealed class PurchasesApiTests : IDisposable
             (await manager.PutAsJsonAsync($"/api/purchases/{purchase.Id}", NewPurchase(data, "FAC-1"))).StatusCode);
         Assert.Equal(HttpStatusCode.OK,
             (await manager.PostAsJsonAsync($"/api/purchases/{purchase.Id}/cancel", new { reason = "Error" })).StatusCode);
+    }
+
+    [Fact]
+    public async Task Stocks_show_the_purchased_existence_and_require_purchases_view()
+    {
+        var admin = await _factory.CreateAdminClientAsync();
+        var data = await CreateReferencesAsync(admin);
+        (await admin.PostAsJsonAsync("/api/purchases", NewPurchase(data, "FAC-1"))).EnsureSuccessStatusCode();
+
+        var stocks = (await admin.GetFromJsonAsync<PagedResult<StockListItemDto>>(
+            $"/api/stocks?branchId={data.BranchId}"))!;
+        Assert.Equal(6, Assert.Single(stocks.Items).Quantity);
+
+        Assert.Equal(HttpStatusCode.BadRequest, (await admin.GetAsync("/api/stocks")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await admin.GetAsync("/api/stocks?branchId=9999")).StatusCode);
+
+        var (other, _) = await _factory.CreateUserClientAsync(admin, "sinexistencias", Permissions.CatalogView);
+        Assert.Equal(HttpStatusCode.Forbidden, (await other.GetAsync($"/api/stocks?branchId={data.BranchId}")).StatusCode);
+        var (viewer, _) = await _factory.CreateUserClientAsync(admin, "conexistencias", Permissions.PurchasesView);
+        Assert.Equal(HttpStatusCode.OK, (await viewer.GetAsync($"/api/stocks?branchId={data.BranchId}")).StatusCode);
     }
 
     private static object NewPurchase(TestData data, string document) => new

@@ -10,6 +10,7 @@ using Pharmacy.Core.Products;
 using Pharmacy.Core.Purchases;
 using Pharmacy.Core.Roles;
 using Pharmacy.Core.Settings;
+using Pharmacy.Core.Stocks;
 using Pharmacy.Core.Suppliers;
 using Pharmacy.Core.Users;
 
@@ -39,6 +40,7 @@ public static class DependencyInjection
         services.AddScoped<SupplierService>();
         services.AddScoped<ProductService>();
         services.AddScoped<PurchaseService>();
+        services.AddScoped<StockService>();
 
         return services;
     }
