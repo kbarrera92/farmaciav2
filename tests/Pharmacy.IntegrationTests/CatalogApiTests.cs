@@ -16,7 +16,7 @@ public sealed class CatalogApiTests : IDisposable
     {
         var admin = await _factory.CreateAdminClientAsync();
 
-        var create = await admin.PostAsJsonAsync("/api/categories", new { name = "Analgesicos" });
+        var create = await admin.PostAsJsonAsync("/api/categories", new { name = "Analgésicos" });
         Assert.Equal(HttpStatusCode.Created, create.StatusCode);
         var category = (await create.Content.ReadFromJsonAsync<CategoryDto>())!;
 

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -23,6 +24,11 @@ public sealed class PharmacyApiFactory : WebApplicationFactory<Program>
     public PharmacyApiFactory()
     {
         _connection.Open();
+
+        // SQLite does not know the SQL Server collations used by the model; emulate them.
+        var spanish = CultureInfo.GetCultureInfo("es-ES").CompareInfo;
+        _connection.CreateCollation(DbCollations.SpanishCaseAndAccentInsensitive,
+            (x, y) => spanish.Compare(x, y, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace));
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

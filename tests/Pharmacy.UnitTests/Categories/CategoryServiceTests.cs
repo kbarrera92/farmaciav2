@@ -11,26 +11,37 @@ public sealed class CategoryServiceTests : IDisposable
     public void Dispose() => _env.Dispose();
 
     [Fact]
-    public async Task Name_is_trimmed_and_must_be_unique_ignoring_case_and_spaces()
+    public async Task Name_is_trimmed_and_must_be_unique_ignoring_case_accents_and_spaces()
     {
-        var created = await Create("  Analgesicos ");
-        Assert.Equal("Analgesicos", created.Name);
+        var created = await Create("  Analgésicos ");
+        Assert.Equal("Analgésicos", created.Name);
         Assert.True(created.IsActive);
 
         await Assert.ThrowsAsync<ConflictException>(() => Create(" ANALGESICOS "));
+        await Assert.ThrowsAsync<ConflictException>(() => Create("analgésicos"));
+    }
+
+    [Fact]
+    public async Task Enie_is_a_different_letter_not_an_accent()
+    {
+        await Create("Baños");
+
+        var other = await Create("Banos");
+
+        Assert.Equal("Banos", other.Name);
     }
 
     [Fact]
     public async Task Renaming_keeping_the_same_name_is_allowed_but_not_to_another_existing_name()
     {
-        var analgesics = await Create("Analgesicos");
-        var antibiotics = await Create("Antibioticos");
+        var analgesics = await Create("Analgésicos");
+        var antibiotics = await Create("Antibióticos");
 
         var renamed = await _env.Categories.UpdateAsync(analgesics.Id, new SaveCategoryRequest { Name = "analgesicos" });
         Assert.Equal("analgesicos", renamed.Name);
 
         await Assert.ThrowsAsync<ConflictException>(
-            () => _env.Categories.UpdateAsync(antibiotics.Id, new SaveCategoryRequest { Name = "Analgesicos" }));
+            () => _env.Categories.UpdateAsync(antibiotics.Id, new SaveCategoryRequest { Name = "ANALGÉSICOS" }));
     }
 
     [Fact]

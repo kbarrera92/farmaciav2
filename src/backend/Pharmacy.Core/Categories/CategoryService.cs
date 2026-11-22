@@ -56,11 +56,14 @@ public sealed class CategoryService(IAppDbContext db)
             c.Id, c.Name, c.IsActive,
             new AuditInfo(c.CreatedAtUtc, c.CreatedBy!.FullName, c.UpdatedAtUtc, c.UpdatedBy!.FullName)));
 
+    /// <summary>
+    /// The Name column uses a case and accent insensitive collation, so a plain equality
+    /// already treats "Analgésicos" and "ANALGESICOS" as the same name.
+    /// </summary>
     private async Task EnsureUniqueNameAsync(string name, int? excludeId, CancellationToken ct)
     {
-        var normalized = TextNormalizer.Normalize(name);
         var exists = await db.Categories.AnyAsync(
-            c => c.Name.ToUpper() == normalized && (excludeId == null || c.Id != excludeId), ct);
+            c => c.Name == name && (excludeId == null || c.Id != excludeId), ct);
         if (exists)
             throw new ConflictException($"Ya existe una categoría con el nombre '{name}'.");
     }

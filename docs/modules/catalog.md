@@ -107,8 +107,9 @@ Observación: `verInventarioxsuc` y `verInventarioxsucfecha` devuelven `PROVEEDO
 | Productos | Se implementan **después**, con las mejoras que definirá el usuario. Este análisis es la base. | Usuario |
 | Permisos | `catalog.view` (consultar) y `catalog.manage` (administrar) cubren todo el catálogo: categorías, estanterías y productos. | Usuario |
 | Categorías: campos | Nombre (máx. 50) + activo/inactivo + auditoría. Sin descripción ni jerarquía. Tabla nueva `Categories`. | Usuario |
-| Categorías: unicidad | Nombre único sin distinguir mayúsculas ni espacios al inicio/fin (índice único + validación en el servicio). Las inactivas también cuentan. Distinto del original, que admitía repetidos. | Usuario (P-79) |
+| Categorías: unicidad | Nombre único sin distinguir mayúsculas, tildes ni espacios al inicio/fin ("Analgésicos" = "ANALGESICOS"). La "ñ" sí se distingue de la "n" (reglas del español). Columna con collation `Modern_Spanish_100_CI_AI` + índice único + validación en el servicio. Las inactivas también cuentan. Distinto del original, que admitía repetidos. | Usuario (P-79) |
 | Categorías: baja | Solo desactivar; no se borran. Una categoría inactiva no se lista por defecto. | Usuario |
+| Categorías en productos | Al crear o editar un producto solo se ofrecen categorías activas. Un producto cuya categoría se desactiva la conserva. | Usuario |
 | Datos existentes | Se importarán después mediante script, con Id nuevos (no se conservan los originales). | Usuario (P-80) |
 
 ## 5. Preguntas pendientes

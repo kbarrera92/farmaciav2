@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -45,6 +46,7 @@ public sealed class TestEnvironment : IDisposable
     {
         _connection = new SqliteConnection("DataSource=:memory:");
         _connection.Open();
+        RegisterSqlServerCollations(_connection);
 
         CurrentUser = new TestCurrentUser();
         Clock = new MutableTimeProvider(new DateTimeOffset(2026, 1, 15, 12, 0, 0, TimeSpan.Zero));
@@ -104,6 +106,17 @@ public sealed class TestEnvironment : IDisposable
     {
         Db.Dispose();
         _connection.Dispose();
+    }
+
+    /// <summary>
+    /// SQLite does not know the SQL Server collations used by the model; emulate them so the
+    /// tests compare text the same way as production.
+    /// </summary>
+    private static void RegisterSqlServerCollations(SqliteConnection connection)
+    {
+        var spanish = CultureInfo.GetCultureInfo("es-ES").CompareInfo;
+        connection.CreateCollation(DbCollations.SpanishCaseAndAccentInsensitive,
+            (x, y) => spanish.Compare(x, y, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace));
     }
 
     private void Seed()
