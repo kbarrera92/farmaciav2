@@ -4,7 +4,7 @@ Paso 5 de la fase 1 (`docs/migration-dependencies.md` §4). Este documento recog
 original (`docs/database-schema.sql`) antes de implementar. Igual que en los módulos anteriores, la base
 nueva usa **tablas propias con FKs reales**; las tablas originales sirven solo como referencia.
 
-Estado: **en implementación**. Categorías, proveedores y productos implementados. Las decisiones marcadas como Pendiente se confirman antes de implementar.
+Estado: **implementado**. Categorías, proveedores y productos. La consulta de existencias por sucursal pasa al módulo de compras (`docs/modules/purchases.md`). Las decisiones marcadas como Pendiente se confirman antes de implementar.
 
 ## 1. Tablas originales
 
