@@ -2,6 +2,8 @@ using System.Net;
 using System.Net.Http.Json;
 using Pharmacy.Core.Auth;
 using Pharmacy.Core.Categories;
+using Pharmacy.Core.Common;
+using Pharmacy.Core.Products;
 using Pharmacy.Core.Suppliers;
 
 namespace Pharmacy.IntegrationTests;
@@ -101,5 +103,79 @@ public sealed class CatalogApiTests : IDisposable
             (await viewer.PostAsJsonAsync("/api/suppliers", new { name = "Otro" })).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden,
             (await viewer.PatchAsJsonAsync($"/api/suppliers/{supplier!.Id}/status", new { isActive = false })).StatusCode);
+    }
+
+    [Fact]
+    public async Task Product_lifecycle_through_the_api()
+    {
+        var admin = await _factory.CreateAdminClientAsync();
+        var (categoryId, supplierId) = await CreateReferencesAsync(admin);
+        var branches = (await admin.GetFromJsonAsync<List<NamedReference>>("/api/lookups/branches"))!;
+
+        var create = await admin.PostAsJsonAsync("/api/products", new
+        {
+            name = "acetaminofén 500 mg",
+            presentation = "Tabletas",
+            barcode = "7501",
+            categoryId,
+            supplierId,
+            price = 15.5m,
+            cost = 10m,
+            minStock = 5,
+            isControlled = true,
+            branches = new[] { new { branchId = branches[0].Id, price = 18m, minStock = 2, shelf = "A-3" } },
+        });
+        Assert.Equal(HttpStatusCode.Created, create.StatusCode);
+        var product = (await create.Content.ReadFromJsonAsync<ProductDetailDto>())!;
+        Assert.Equal("Acetaminofén 500 mg", product.Name);
+        Assert.Equal("A-3", Assert.Single(product.Branches).Shelf);
+
+        var duplicateBarcode = await admin.PostAsJsonAsync("/api/products",
+            new { name = "Otro", presentation = "Jarabe", barcode = "7501", categoryId, supplierId, price = 15m, cost = 10m });
+        Assert.Equal(HttpStatusCode.Conflict, duplicateBarcode.StatusCode);
+
+        var invalidPrice = await admin.PostAsJsonAsync("/api/products",
+            new { name = "Otro", presentation = "Jarabe", categoryId, supplierId, price = 10m, cost = 10m });
+        Assert.Equal(HttpStatusCode.BadRequest, invalidPrice.StatusCode);
+        Assert.Contains("\"price\"", await invalidPrice.Content.ReadAsStringAsync());
+
+        var missingName = await admin.PostAsJsonAsync("/api/products",
+            new { name = "", presentation = "Jarabe", categoryId, supplierId, price = 15m, cost = 10m });
+        Assert.Equal(HttpStatusCode.BadRequest, missingName.StatusCode);
+
+        var page = (await admin.GetFromJsonAsync<PagedResult<ProductListItemDto>>("/api/products?isControlled=true"))!;
+        Assert.Equal(1, page.TotalCount);
+        Assert.Equal("Droguería Norte", page.Items[0].Supplier.Name);
+
+        (await admin.PatchAsJsonAsync($"/api/products/{product.Id}/status", new { isActive = false })).EnsureSuccessStatusCode();
+        Assert.Equal(0, (await admin.GetFromJsonAsync<PagedResult<ProductListItemDto>>("/api/products?isActive=true"))!.TotalCount);
+    }
+
+    [Fact]
+    public async Task Catalog_view_can_read_products_but_not_change_them()
+    {
+        var admin = await _factory.CreateAdminClientAsync();
+        var (categoryId, supplierId) = await CreateReferencesAsync(admin);
+        var product = await (await admin.PostAsJsonAsync("/api/products",
+                new { name = "Ibuprofeno", presentation = "Tabletas", categoryId, supplierId, price = 15m, cost = 10m }))
+            .Content.ReadFromJsonAsync<ProductDetailDto>();
+        var (viewer, _) = await _factory.CreateUserClientAsync(admin, "consultaprod", Permissions.CatalogView);
+
+        Assert.Equal(HttpStatusCode.OK, (await viewer.GetAsync("/api/products")).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await viewer.GetAsync($"/api/products/{product!.Id}")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden,
+            (await viewer.PostAsJsonAsync("/api/products",
+                new { name = "Otro", presentation = "X", categoryId, supplierId, price = 15m, cost = 10m })).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden,
+            (await viewer.PatchAsJsonAsync($"/api/products/{product.Id}/status", new { isActive = false })).StatusCode);
+    }
+
+    private static async Task<(int CategoryId, int SupplierId)> CreateReferencesAsync(HttpClient admin)
+    {
+        var category = await (await admin.PostAsJsonAsync("/api/categories", new { name = "Analgésicos" }))
+            .Content.ReadFromJsonAsync<CategoryDto>();
+        var supplier = await (await admin.PostAsJsonAsync("/api/suppliers", new { name = "Droguería Norte" }))
+            .Content.ReadFromJsonAsync<SupplierDto>();
+        return (category!.Id, supplier!.Id);
     }
 }

@@ -4,7 +4,7 @@ Paso 5 de la fase 1 (`docs/migration-dependencies.md` §4). Este documento recog
 original (`docs/database-schema.sql`) antes de implementar. Igual que en los módulos anteriores, la base
 nueva usa **tablas propias con FKs reales**; las tablas originales sirven solo como referencia.
 
-Estado: **en implementación**. Categorías y proveedores implementados; productos en análisis. Las decisiones marcadas como Pendiente se confirman antes de implementar.
+Estado: **en implementación**. Categorías, proveedores y productos implementados en backend; falta el frontend de productos. Las decisiones marcadas como Pendiente se confirman antes de implementar.
 
 ## 1. Tablas originales
 
@@ -104,25 +104,33 @@ Observación: `verInventarioxsuc` y `verInventarioxsucfecha` devuelven `PROVEEDO
 | Tema | Decisión | Origen |
 |---|---|---|
 | Laboratorio | **Campo de texto del producto**, sin catálogo propio. Se descarta `LABORATORIO` (ningún SP la usa). | Usuario |
-| Productos | Se implementan **después**, con las mejoras que definirá el usuario. Este análisis es la base. | Usuario |
 | Permisos | `catalog.view` (consultar) y `catalog.manage` (administrar) cubren todo el catálogo: categorías, estanterías y productos. | Usuario |
 | Categorías: campos | Nombre (máx. 50) + activo/inactivo + auditoría. Sin descripción ni jerarquía. Tabla nueva `Categories`. | Usuario |
 | Categorías: unicidad | Nombre único sin distinguir mayúsculas, tildes ni espacios al inicio/fin ("Analgésicos" = "ANALGESICOS"). La "ñ" sí se distingue de la "n" (reglas del español). Columna con collation `Modern_Spanish_100_CI_AI` + índice único + validación en el servicio. Las inactivas también cuentan. Distinto del original, que admitía repetidos. | Usuario (P-79) |
 | Categorías: baja | Solo desactivar; no se borran. Una categoría inactiva no se lista por defecto. | Usuario |
 | Categorías en productos | Al crear o editar un producto solo se ofrecen categorías activas. Un producto cuya categoría se desactiva la conserva. | Usuario |
 | Datos existentes | Se importarán después mediante script, con Id nuevos (no se conservan los originales). | Usuario (P-80) |
-| Estantería | **Ubicación por sucursal en texto libre** (p. ej. "A-3", "Vitrina 2"). Su objetivo es que el usuario sepa dónde buscar el producto en su sucursal. Sin catálogo ni pantalla de estanterías; se descarta `ESTANTERIA`. Dónde se guarda depende de P-77. | Usuario (P-75) |
+| Estantería | **Ubicación por sucursal en texto libre** (p. ej. "A-3", "Vitrina 2"). Su objetivo es que el usuario sepa dónde buscar el producto en su sucursal. Sin catálogo ni pantalla de estanterías; se descarta `ESTANTERIA`. Se guarda en `ProductBranchSettings.Shelf` (máx. 30). | Usuario (P-75) |
 | Proveedores: campos | Todos los del original (`PROVEEDOR`): razón social (máx. 100), NIT, dirección, teléfono, correo, contacto y teléfono del contacto; opcionales salvo la razón social. Activo/inactivo y auditoría. Tabla nueva `Suppliers`. | Usuario (P-76) |
 | Proveedores: unicidad | Razón social única sin distinguir mayúsculas ni tildes (inactivos cuentan). NIT único cuando se informa (varios sin NIT permitidos). Distinto del original, sin restricciones. | Usuario |
 | Proveedores: baja | Solo desactivar. Un proveedor inactivo no se ofrece al crear o editar productos; el producto que ya lo tiene lo conserva. | Usuario |
+| Productos: campos | Los de `PRODUCTO` (nombre, presentación, composición, acción terapéutica, indicaciones, contraindicaciones, observaciones, medida, laboratorio, código de barras, categoría, proveedor, precio, costo, stock mínimo) más tipo y estado. Categoría y proveedor son obligatorios y con FK real. La fecha de registro es `CreatedAtUtc` de la auditoría. Tablas nuevas `Products` y `ProductBranchSettings`. | Usuario |
+| Productos: precio | Precio general del producto + precio opcional por sucursal. La sucursal sin precio propio usa el general. Costo único para todas las sucursales. | Usuario |
+| Productos: stock mínimo | Valor general opcional + valor opcional por sucursal; la sucursal sin valor propio usa el general. | Usuario |
+| Productos: validaciones | Nombre y presentación obligatorios. Costo > 0, precio > 0 y precio > costo (también cada precio de sucursal). Máximo 2 decimales y 99,999,999.99. Stock mínimo ≥ 0. Categoría y proveedor existentes y activos al crearlos o cambiarlos (el producto conserva uno que luego se desactiva). Sucursales sin repetir, existentes y activas. | Usuario |
+| Productos: unicidad | Nombre + presentación únicos sin distinguir mayúsculas ni tildes (la misma medicina convive en varias presentaciones). Código de barras único cuando se informa; vacío se guarda como nulo y puede repetirse. | Usuario (P-79) |
+| Productos: tipo | Dos indicadores combinables: **controlado** y **bonificable**; "normal" es ninguno de los dos. Por ahora solo se guardan, se filtran y se muestran; las reglas de venta se definen con ventas. | Usuario |
+| Productos: baja | Solo desactivar; no se borran. | Usuario (P-78) |
+| Productos: sucursales | `ProductBranchSettings` guarda precio, stock mínimo y estantería por sucursal; solo existe fila si algún valor está informado. Modificar una fila actualiza la auditoría del producto. | Usuario |
+| Productos: existencias | Crear un producto o una sucursal **no** crea filas de existencia. La fila se crea con el primer movimiento (incluida la compra) y la ausencia cuenta como 0. Se implementa con compras, ajustes, traslados y ventas. | Usuario (P-77) |
 | Formato de textos | Ver `docs/data-conventions.md`. | Usuario |
 
 ## 5. Preguntas pendientes
 
 - **P-75 — Estantería:** resuelta (texto libre por sucursal, ver §4).
 - **P-76 — Proveedor del producto:** resuelta (se implementa antes que productos como catálogo simple, ver §4).
-- **P-77 — Existencias (RN-64):** en la base nueva, ¿se crea la fila de existencia de cada sucursal al crear el producto (y de cada producto al crear una sucursal), o se crea al primer movimiento y la ausencia cuenta como 0? Recomendación: crearla en el primer movimiento (incluida la compra) y tratar la ausencia como 0 en todas las consultas.
-- **P-78 — Estado del producto:** no existe en el original. ¿Se agrega activo/inactivo como en los demás módulos (no se borran productos con movimientos)?
-- **P-79 — Unicidad:** categoría resuelta (nombre único, ver §4). Pendiente: ¿código de barras único cuando se informa?
+- **P-77 — Existencias (RN-64):** resuelta (se crea en el primer movimiento y la ausencia cuenta como 0, ver §4).
+- **P-78 — Estado del producto:** resuelta (activo/inactivo, ver §4).
+- **P-79 — Unicidad:** categoría resuelta (nombre único, ver §4). código de barras resuelto (único cuando se informa, ver §4).
 - **P-80 — Datos existentes:** resuelta (importación posterior con Id nuevos, ver §4).
 - **P-74** (ya registrada): productos sin fila en `Existencias` o con stock negativo en los datos actuales.

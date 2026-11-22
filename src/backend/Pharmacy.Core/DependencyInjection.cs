@@ -5,6 +5,7 @@ using Pharmacy.Core.Auth;
 using Pharmacy.Core.Branches;
 using Pharmacy.Core.Categories;
 using Pharmacy.Core.PaymentMethods;
+using Pharmacy.Core.Products;
 using Pharmacy.Core.Roles;
 using Pharmacy.Core.Settings;
 using Pharmacy.Core.Suppliers;
@@ -33,6 +34,7 @@ public static class DependencyInjection
         services.AddScoped<PaymentMethodService>();
         services.AddScoped<CategoryService>();
         services.AddScoped<SupplierService>();
+        services.AddScoped<ProductService>();
 
         return services;
     }

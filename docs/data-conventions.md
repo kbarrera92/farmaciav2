@@ -11,6 +11,7 @@ al crear o editar; el frontend no las replica.
 | Descripciones (rol) | Igual que los nombres de catálogo. | `ACCESO TOTAL` → `Acceso total` |
 | Nombres propios: nombre completo del usuario, nombre de la empresa, razón social y contacto del proveedor | Mayúscula inicial en cada palabra (también tras guion). Los conectores también se capitalizan. | `josé pérez-molina` → `José Pérez-Molina`; `farmacia del ahorro` → `Farmacia Del Ahorro` |
 | Direcciones: sucursal, empresa, proveedor | Solo se fuerza la primera letra; el resto se guarda como se escribió. | `zona 1, Ciudad de Guatemala` → `Zona 1, Ciudad de Guatemala` |
+| Productos: nombre, presentación, composición, acción terapéutica, indicaciones, contraindicaciones, observaciones, medida, laboratorio | Solo se fuerza la primera letra; el resto se guarda como se escribió (conserva `mg`, marcas y siglas). | `acetaminofén 500 mg` → `Acetaminofén 500 mg` |
 | Nombre de usuario, teléfono, correo, NIT (también del proveedor) | Sin cambios (solo se quitan espacios al inicio y al final). | |
 
 **Siglas:** en las dos primeras reglas, una palabra de 2 a 4 letras escrita totalmente en mayúscula se conserva
@@ -25,6 +26,6 @@ reutilizando `TextNormalizer` (decisión del usuario).
 
 ## 2. Comparación de nombres únicos
 
-Los nombres únicos (categorías, formas de pago, roles, sucursales, proveedores) no distinguen mayúsculas ni tildes:
+Los nombres únicos (categorías, formas de pago, roles, sucursales, proveedores) y la combinación nombre + presentación del producto no distinguen mayúsculas ni tildes:
 `Analgésicos` = `ANALGESICOS`. La `ñ` sí es distinta de la `n`. Se implementa con la collation
 `Modern_Spanish_100_CI_AI` en cada columna, más un índice único y la validación del servicio.

@@ -3,6 +3,7 @@ using Pharmacy.Core.Auth;
 using Pharmacy.Core.Branches;
 using Pharmacy.Core.Categories;
 using Pharmacy.Core.PaymentMethods;
+using Pharmacy.Core.Products;
 using Pharmacy.Core.Roles;
 using Pharmacy.Core.Settings;
 using Pharmacy.Core.Suppliers;
@@ -25,6 +26,7 @@ public interface IAppDbContext
     DbSet<PaymentMethod> PaymentMethods { get; }
     DbSet<Category> Categories { get; }
     DbSet<Supplier> Suppliers { get; }
+    DbSet<Product> Products { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

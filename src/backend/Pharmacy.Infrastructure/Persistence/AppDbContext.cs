@@ -5,6 +5,7 @@ using Pharmacy.Core.Branches;
 using Pharmacy.Core.Categories;
 using Pharmacy.Core.Common;
 using Pharmacy.Core.PaymentMethods;
+using Pharmacy.Core.Products;
 using Pharmacy.Core.Roles;
 using Pharmacy.Core.Settings;
 using Pharmacy.Core.Suppliers;
@@ -27,6 +28,7 @@ public sealed class AppDbContext(
     public DbSet<PaymentMethod> PaymentMethods => Set<PaymentMethod>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Supplier> Suppliers => Set<Supplier>();
+    public DbSet<Product> Products => Set<Product>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -112,7 +114,7 @@ public sealed class AppDbContext(
     {
         var parents = new HashSet<AuditableEntity>(ReferenceEqualityComparer.Instance);
         var changedChildren = ChangeTracker.Entries()
-            .Where(e => e.Entity is not AuditableEntity && e.State is (EntityState.Added or EntityState.Deleted));
+            .Where(e => e.Entity is not AuditableEntity && e.State is (EntityState.Added or EntityState.Deleted or EntityState.Modified));
 
         foreach (var child in changedChildren)
         {

@@ -28,11 +28,11 @@ En producción, la administración se publica en **`https://admin.farmaciahorro.
 ### 3.2 Sucursales — Implementado
 - Mantenimiento de sucursales (`SUCURSAL`).
 
-### 3.3 Catálogo de productos
+### 3.3 Catálogo de productos — Implementado en backend (falta frontend de productos)
 - Productos, categorías y estanterías: `PRODUCTO`, `CATEGORIA`, `ESTANTERIA`. El laboratorio es un campo de texto del producto (decisión del usuario; la tabla `LABORATORIO` no la usa ningún procedimiento). Análisis: `docs/modules/catalog.md`.
-- Precios del producto (en `PRODUCTO`; no existe historial de precios — RN-63, Confirmado).
+- Precios del producto: precio general y precio opcional por sucursal (no existe historial de precios — RN-63, Confirmado).
 - Consulta de existencias por sucursal (`Existencias`; `sp_infoProductos`, `sp_getStoc` como referencia).
-- Pendiente de confirmar: si al crear un producto se crea su fila en `Existencias` para cada sucursal (afecta compras, RN-64).
+- Existencias: no se crean al crear el producto; se crean en el primer movimiento (P-77, resuelta).
 
 ### 3.4 Proveedores — Implementado
 - Mantenimiento de `PROVEEDOR`. Se incluye porque compras y cuentas por pagar dependen de él.
