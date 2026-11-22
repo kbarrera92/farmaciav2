@@ -6,8 +6,10 @@ using Pharmacy.Core.Categories;
 using Pharmacy.Core.Common;
 using Pharmacy.Core.PaymentMethods;
 using Pharmacy.Core.Products;
+using Pharmacy.Core.Purchases;
 using Pharmacy.Core.Roles;
 using Pharmacy.Core.Settings;
+using Pharmacy.Core.Stocks;
 using Pharmacy.Core.Suppliers;
 using Pharmacy.Core.Users;
 
@@ -29,6 +31,10 @@ public sealed class AppDbContext(
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Supplier> Suppliers => Set<Supplier>();
     public DbSet<Product> Products => Set<Product>();
+    public DbSet<Purchase> Purchases => Set<Purchase>();
+    public DbSet<PurchaseItem> PurchaseItems => Set<PurchaseItem>();
+    public DbSet<AccountPayable> AccountsPayable => Set<AccountPayable>();
+    public DbSet<Stock> Stocks => Set<Stock>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

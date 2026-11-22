@@ -117,6 +117,27 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                             Description = "Crear, editar y activar/desactivar categorías, proveedores y productos del catálogo.",
                             Module = "Catálogo",
                             Name = "Administrar catálogo"
+                        },
+                        new
+                        {
+                            Code = "purchases.view",
+                            Description = "Consultar las compras y las existencias por sucursal.",
+                            Module = "Compras",
+                            Name = "Ver compras"
+                        },
+                        new
+                        {
+                            Code = "purchases.create",
+                            Description = "Registrar compras de productos a proveedores.",
+                            Module = "Compras",
+                            Name = "Registrar compras"
+                        },
+                        new
+                        {
+                            Code = "purchases.manage",
+                            Description = "Editar y anular compras ya registradas.",
+                            Module = "Compras",
+                            Name = "Administrar compras"
                         });
                 });
 
@@ -388,6 +409,188 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                     b.ToTable("ProductBranchSettings", (string)null);
                 });
 
+            modelBuilder.Entity("Pharmacy.Core.Purchases.AccountPayable", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Balance")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("DueDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("PaidDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("PurchaseId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Total")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UpdatedByUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("DueDate");
+
+                    b.HasIndex("PurchaseId")
+                        .IsUnique();
+
+                    b.HasIndex("SupplierId");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("AccountsPayable", (string)null);
+                });
+
+            modelBuilder.Entity("Pharmacy.Core.Purchases.Purchase", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BranchId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<DateTime?>("CancelledAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CancelledByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CreditDays")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DocumentNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .UseCollation("Modern_Spanish_100_CI_AI");
+
+                    b.Property<bool>("IsCancelled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateOnly?>("PaymentDate")
+                        .HasColumnType("date");
+
+                    b.Property<int?>("PaymentMethodId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("PurchaseDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Total")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<byte>("Type")
+                        .HasColumnType("tinyint");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UpdatedByUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("CancelledByUserId");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("PaymentMethodId");
+
+                    b.HasIndex("PurchaseDate");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.HasIndex("SupplierId", "DocumentNumber")
+                        .IsUnique()
+                        .HasFilter("[IsCancelled] = 0");
+
+                    b.ToTable("Purchases", (string)null);
+                });
+
+            modelBuilder.Entity("Pharmacy.Core.Purchases.PurchaseItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PurchaseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("PurchaseId", "ProductId")
+                        .IsUnique();
+
+                    b.ToTable("PurchaseItems", (string)null);
+                });
+
             modelBuilder.Entity("Pharmacy.Core.Roles.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -512,6 +715,27 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                         {
                             t.HasCheckConstraint("CK_CompanySettings_SingleRow", "[Id] = 1");
                         });
+                });
+
+            modelBuilder.Entity("Pharmacy.Core.Stocks.Stock", b =>
+                {
+                    b.Property<int>("BranchId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("BranchId", "ProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Stocks", (string)null);
                 });
 
             modelBuilder.Entity("Pharmacy.Core.Suppliers.Supplier", b =>
@@ -767,6 +991,105 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Pharmacy.Core.Purchases.AccountPayable", b =>
+                {
+                    b.HasOne("Pharmacy.Core.Users.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Pharmacy.Core.Purchases.Purchase", "Purchase")
+                        .WithOne("AccountPayable")
+                        .HasForeignKey("Pharmacy.Core.Purchases.AccountPayable", "PurchaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Pharmacy.Core.Suppliers.Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Pharmacy.Core.Users.User", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("Purchase");
+
+                    b.Navigation("Supplier");
+
+                    b.Navigation("UpdatedBy");
+                });
+
+            modelBuilder.Entity("Pharmacy.Core.Purchases.Purchase", b =>
+                {
+                    b.HasOne("Pharmacy.Core.Branches.Branch", "Branch")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Pharmacy.Core.Users.User", "CancelledBy")
+                        .WithMany()
+                        .HasForeignKey("CancelledByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Pharmacy.Core.Users.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Pharmacy.Core.PaymentMethods.PaymentMethod", "PaymentMethod")
+                        .WithMany()
+                        .HasForeignKey("PaymentMethodId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Pharmacy.Core.Suppliers.Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Pharmacy.Core.Users.User", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Branch");
+
+                    b.Navigation("CancelledBy");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("PaymentMethod");
+
+                    b.Navigation("Supplier");
+
+                    b.Navigation("UpdatedBy");
+                });
+
+            modelBuilder.Entity("Pharmacy.Core.Purchases.PurchaseItem", b =>
+                {
+                    b.HasOne("Pharmacy.Core.Products.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Pharmacy.Core.Purchases.Purchase", "Purchase")
+                        .WithMany("Items")
+                        .HasForeignKey("PurchaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Purchase");
+                });
+
             modelBuilder.Entity("Pharmacy.Core.Roles.Role", b =>
                 {
                     b.HasOne("Pharmacy.Core.Users.User", "CreatedBy")
@@ -818,6 +1141,25 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                     b.Navigation("CreatedBy");
 
                     b.Navigation("UpdatedBy");
+                });
+
+            modelBuilder.Entity("Pharmacy.Core.Stocks.Stock", b =>
+                {
+                    b.HasOne("Pharmacy.Core.Branches.Branch", "Branch")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Pharmacy.Core.Products.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Branch");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Pharmacy.Core.Suppliers.Supplier", b =>
@@ -873,6 +1215,13 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Pharmacy.Core.Products.Product", b =>
                 {
                     b.Navigation("BranchSettings");
+                });
+
+            modelBuilder.Entity("Pharmacy.Core.Purchases.Purchase", b =>
+                {
+                    b.Navigation("AccountPayable");
+
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("Pharmacy.Core.Roles.Role", b =>

@@ -4,7 +4,7 @@ Paso 7 de la fase 1 (`docs/migration-dependencies.md` §4). Este documento recog
 original (`docs/database-schema.sql`) antes de implementar. Igual que en los módulos anteriores, la base
 nueva usa **tablas propias con FKs reales**; las tablas originales sirven solo como referencia.
 
-Estado: **análisis cerrado**. Nada implementado. P-81 a P-88 respondidas. Las decisiones marcadas como Pendiente se confirman antes de implementar.
+Estado: **análisis cerrado**. Backend en curso: tablas y permisos hechos; servicio de compras y consulta de existencias pendientes. P-81 a P-88 respondidas.
 
 Este módulo incluye también la **tabla de existencias** y su **consulta por sucursal**, que quedaron fuera del
 catálogo: la compra es el primer movimiento que genera stock (P-77, `docs/modules/catalog.md` §4).
@@ -90,6 +90,12 @@ De este módulo:
 | Quién registra | El administrador registra compras; el permiso se puede asignar a otros roles (p. ej. bodeguero). El usuario **elige la sucursal** de la compra en el formulario. Permisos: `purchases.view` (consultar), `purchases.create` (registrar) y `purchases.manage` (editar y anular, solo administrador). | Usuario (P-86) |
 | Stock negativo | La tabla de existencias admite stock negativo, como el original (RN-62). | Usuario (P-87) |
 | Consulta de existencias | Va en el módulo de compras, con filtros por sucursal y categoría. Columnas: producto, categoría, existencia y stock mínimo de la sucursal. Sin filtro de bajo stock. | Usuario (P-88) |
+| Número de documento | Se guarda como **texto** (máx. 30), no como `bigint`: admite letras, guiones y ceros a la izquierda. La unicidad por proveedor no distingue mayúsculas ni tildes e **ignora las compras anuladas**, de modo que una factura anulada puede registrarse de nuevo. | Usuario |
+| Fechas | El usuario elige la fecha de compra (hoy por defecto, no futura). En contado, la fecha de pago es la fecha de compra. | Usuario |
+| Anulación | Exige un **motivo** (máx. 250). Queda registrado quién y cuándo anuló. | Usuario |
+| Cuenta por pagar | Este paso crea una tabla mínima `AccountsPayable` (compra, proveedor, fecha de inicio, fecha límite, total, saldo, estado Pendiente/Pagada). No hay tabla de abonos todavía: hasta que exista el módulo de cuentas por pagar, "tiene abonos" significa saldo distinto del total. | Usuario |
+
+Tablas nuevas (migración `0007_Purchases.sql`): `Purchases`, `PurchaseItems`, `Stocks` y `AccountsPayable`.
 
 ## 5. Preguntas pendientes
 

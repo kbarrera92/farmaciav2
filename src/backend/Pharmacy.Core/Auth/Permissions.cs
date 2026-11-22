@@ -18,6 +18,9 @@ public static class Permissions
     public const string SettingsManage = "settings.manage";
     public const string CatalogView = "catalog.view";
     public const string CatalogManage = "catalog.manage";
+    public const string PurchasesView = "purchases.view";
+    public const string PurchasesCreate = "purchases.create";
+    public const string PurchasesManage = "purchases.manage";
 
     public static IReadOnlyList<PermissionDefinition> All { get; } =
     [
@@ -31,6 +34,9 @@ public static class Permissions
         new(SettingsManage, "Administrar configuración", "Configuración", "Editar los datos y el logo de la empresa, y administrar las formas de pago."),
         new(CatalogView, "Ver catálogo", "Catálogo", "Consultar las categorías, proveedores y productos del catálogo."),
         new(CatalogManage, "Administrar catálogo", "Catálogo", "Crear, editar y activar/desactivar categorías, proveedores y productos del catálogo."),
+        new(PurchasesView, "Ver compras", "Compras", "Consultar las compras y las existencias por sucursal."),
+        new(PurchasesCreate, "Registrar compras", "Compras", "Registrar compras de productos a proveedores."),
+        new(PurchasesManage, "Administrar compras", "Compras", "Editar y anular compras ya registradas."),
     ];
 
     public static IReadOnlySet<string> AllCodes { get; } = All.Select(p => p.Code).ToHashSet(StringComparer.Ordinal);

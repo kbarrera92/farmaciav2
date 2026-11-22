@@ -1,11 +1,14 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Pharmacy.Core.Auth;
 using Pharmacy.Core.Branches;
 using Pharmacy.Core.Categories;
 using Pharmacy.Core.PaymentMethods;
 using Pharmacy.Core.Products;
+using Pharmacy.Core.Purchases;
 using Pharmacy.Core.Roles;
 using Pharmacy.Core.Settings;
+using Pharmacy.Core.Stocks;
 using Pharmacy.Core.Suppliers;
 using Pharmacy.Core.Users;
 
@@ -27,6 +30,13 @@ public interface IAppDbContext
     DbSet<Category> Categories { get; }
     DbSet<Supplier> Suppliers { get; }
     DbSet<Product> Products { get; }
+    DbSet<Purchase> Purchases { get; }
+    DbSet<PurchaseItem> PurchaseItems { get; }
+    DbSet<AccountPayable> AccountsPayable { get; }
+    DbSet<Stock> Stocks { get; }
+
+    /// <summary>Used by services that need an explicit transaction across several saves.</summary>
+    DatabaseFacade Database { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
