@@ -81,12 +81,12 @@ De este módulo:
 
 | Tema | Decisión | Origen |
 |---|---|---|
-| Compra al crédito | La compra al crédito es la que tiene cuenta por pagar. | Usuario (P-81) |
-| Documento | `documento` es el número de factura entregado por el proveedor. | Usuario (P-82) |
-| Editar y anular | Solo el administrador, dejando auditoría, y el stock se ajusta en consecuencia. | Usuario (P-83) |
-| Costo del producto | Registrar una compra **no** actualiza `Products.Cost`. | Usuario (P-84) |
-| Productos elegibles | Se pueden comprar productos de cualquier proveedor. | Usuario (P-85) |
-| Quién registra | El administrador registra compras; el permiso se puede asignar a otros roles (p. ej. bodeguero). | Usuario (P-86) |
+| Compra al crédito | La compra tiene un tipo **Contado** o **Crédito**. La compra al crédito es la que tiene cuenta por pagar y la crea automáticamente, con fecha límite. La forma de pago se usa solo para contado. | Usuario (P-81) |
+| Documento | `documento` es el número de factura entregado por el proveedor. **Único por proveedor**: no se repite la misma factura para el mismo proveedor. | Usuario (P-82) |
+| Editar y anular | Solo el administrador. Puede **editar** líneas y cantidades (el stock se ajusta por la diferencia) y **anular** la compra completa. La compra anulada queda marcada, no se borra, y su stock se resta. Ambas acciones dejan auditoría. | Usuario (P-83) |
+| Costo del producto | Registrar una compra **no** actualiza `Products.Cost`. Si el precio de compra es mayor o igual al precio de venta, se permite guardar con una **advertencia**. | Usuario (P-84) |
+| Productos elegibles | Productos de cualquier proveedor, **solo productos activos**. | Usuario (P-85) |
+| Quién registra | El administrador registra compras; el permiso se puede asignar a otros roles (p. ej. bodeguero). El usuario **elige la sucursal** de la compra en el formulario. | Usuario (P-86) |
 | Stock negativo | La tabla de existencias admite stock negativo, como el original (RN-62). | Usuario (P-87) |
 | Consulta de existencias | Va en el módulo de compras, con filtros por sucursal y categoría. | Usuario (P-88) |
 
@@ -94,11 +94,8 @@ De este módulo:
 
 Resueltas: P-81 a P-88 (ver §4). Quedan estos puntos sueltos de esas preguntas:
 
-- **P-81 (resto):** ¿cómo se distingue la compra al crédito (forma de pago "crédito" o campo contado/crédito)? ¿Qué significa `fechaPago` en la compra? ¿La cuenta por pagar se crea automáticamente al registrar la compra?
-- **P-82 (resto):** ¿`documento` debe ser único por proveedor?
-- **P-83 (resto):** ¿se permiten editar y anular, o solo una? Si hay anulación, ¿la compra queda marcada como anulada o se borra? ¿Qué pasa si la cuenta por pagar ya tiene abonos? (depende de P-81)
-- **P-84 (resto):** si el precio de compra es mayor o igual al precio de venta, ¿se permite, se avisa o se bloquea?
-- **P-85 (resto):** ¿se pueden comprar productos inactivos?
-- **P-86 (resto):** permisos propuestos: `purchases.view`, `purchases.create` y `purchases.manage` (editar y anular, solo administrador). ¿Sucursal de la compra: la del usuario o la elige el usuario?
+- **P-81 (resto):** ¿cómo se define la fecha límite de la cuenta por pagar (la ingresa el usuario o se calcula con días de crédito)? ¿Qué pasa con `fechaPago` del original (se descarta o es la fecha de pago de la compra al contado)?
+- **P-83 (resto):** ¿se puede editar o anular una compra al crédito cuya cuenta por pagar ya tiene abonos? ¿Se puede cambiar de contado a crédito al editar?
+- **P-86 (resto):** permisos propuestos: `purchases.view`, `purchases.create` y `purchases.manage` (editar y anular).
 - **P-88 (resto):** columnas de la consulta de existencias (propuesta: producto, categoría, existencia, stock mínimo de la sucursal) y si incluye un filtro de bajo stock mínimo.
 - **P-74** (ya registrada): productos sin fila en `Existencias` o con stock negativo en los datos actuales.
