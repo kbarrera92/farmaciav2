@@ -29,7 +29,7 @@ En producción, la administración se publica en **`https://admin.farmaciahorro.
 - Mantenimiento de sucursales (`SUCURSAL`).
 
 ### 3.3 Catálogo de productos
-- Productos, categorías, laboratorios y estanterías: `PRODUCTO`, `CATEGORIA`, `LABORATORIO`, `ESTANTERIA`.
+- Productos, categorías y estanterías: `PRODUCTO`, `CATEGORIA`, `ESTANTERIA`. El laboratorio es un campo de texto del producto (decisión del usuario; la tabla `LABORATORIO` no la usa ningún procedimiento). Análisis: `docs/modules/catalog.md`.
 - Precios del producto (en `PRODUCTO`; no existe historial de precios — RN-63, Confirmado).
 - Consulta de existencias por sucursal (`Existencias`; `sp_infoProductos`, `sp_getStoc` como referencia).
 - Pendiente de confirmar: si al crear un producto se crea su fila en `Existencias` para cada sucursal (afecta compras, RN-64).
