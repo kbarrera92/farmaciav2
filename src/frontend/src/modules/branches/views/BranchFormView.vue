@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { computed, nextTick, onMounted, reactive, ref } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AsyncState from '@/components/AsyncState.vue'
 import AuditInfo from '@/components/AuditInfo.vue'
 import PageHeader from '@/components/PageHeader.vue'
@@ -15,6 +15,7 @@ const props = defineProps<{ id?: number }>()
 
 const auth = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 
 const isNew = computed(() => props.id === undefined)
 const canManage = auth.can(Permissions.BranchesManage)
@@ -27,6 +28,13 @@ const loadError = ref<string | null>(null)
 const saving = ref(false)
 const error = ref<string | null>(null)
 const success = ref<string | null>(null)
+const messages = ref<HTMLElement | null>(null)
+
+/** Messages render at the top of the form: bring them into view. */
+async function revealMessages(): Promise<void> {
+  await nextTick()
+  messages.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
 const fieldErrors = ref<Record<string, string | undefined>>({})
 
 async function load(): Promise<void> {
@@ -39,6 +47,11 @@ async function load(): Promise<void> {
     loadError.value = errorMessage(e)
   } finally {
     loading.value = false
+  }
+  if (!isNew.value && route.query.created === '1') {
+    success.value = 'Sucursal creada.'
+    await router.replace({ query: {} })
+    await revealMessages()
   }
 }
 
@@ -58,7 +71,7 @@ async function save(): Promise<void> {
     const request = { name: form.name, address: form.address, phone: form.phone.trim() || null }
     if (isNew.value) {
       const created = await branchService.create(request)
-      await router.replace({ name: 'branch-edit', params: { id: created.id } })
+      await router.replace({ name: 'branch-edit', params: { id: created.id }, query: { created: '1' } })
       return
     }
     setBranch(await branchService.update(props.id!, request))
@@ -75,6 +88,7 @@ async function save(): Promise<void> {
   } finally {
     saving.value = false
   }
+  await revealMessages()
 }
 
 async function toggleStatus(): Promise<void> {
@@ -89,6 +103,7 @@ async function toggleStatus(): Promise<void> {
   } catch (e) {
     error.value = errorMessage(e)
   }
+  await revealMessages()
 }
 
 onMounted(load)
@@ -103,8 +118,10 @@ onMounted(load)
     </PageHeader>
 
     <AsyncState :loading="loading" :error="loadError" @retry="load">
-      <p v-if="success" class="alert alert-success" role="status">{{ success }}</p>
-      <p v-if="error" class="alert alert-error" role="alert">{{ error }}</p>
+      <div ref="messages">
+        <p v-if="success" class="alert alert-success" role="status">{{ success }}</p>
+        <p v-if="error" class="alert alert-error" role="alert">{{ error }}</p>
+      </div>
 
       <form class="card" novalidate @submit.prevent="save">
         <fieldset :disabled="!canManage || saving" class="form-grid">

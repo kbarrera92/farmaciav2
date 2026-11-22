@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { computed, nextTick, onMounted, reactive, ref } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AsyncState from '@/components/AsyncState.vue'
 import AuditInfo from '@/components/AuditInfo.vue'
 import PageHeader from '@/components/PageHeader.vue'
@@ -17,6 +17,7 @@ const props = defineProps<{ id?: number }>()
 
 const auth = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 
 const isNew = computed(() => props.id === undefined)
 const canManage = auth.can(Permissions.UsersManage)
@@ -38,6 +39,13 @@ const loadError = ref<string | null>(null)
 const saving = ref(false)
 const error = ref<string | null>(null)
 const success = ref<string | null>(null)
+const messages = ref<HTMLElement | null>(null)
+
+/** Messages render at the top of the form: bring them into view. */
+async function revealMessages(): Promise<void> {
+  await nextTick()
+  messages.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
 const fieldErrors = ref<Record<string, string | undefined>>({})
 
 const resetPassword = ref('')
@@ -62,6 +70,11 @@ async function load(): Promise<void> {
     loadError.value = errorMessage(e)
   } finally {
     loading.value = false
+  }
+  if (!isNew.value && route.query.created === '1') {
+    success.value = 'Usuario creado.'
+    await router.replace({ query: {} })
+    await revealMessages()
   }
 }
 
@@ -98,7 +111,7 @@ async function save(): Promise<void> {
     const request = { fullName: form.fullName, username: form.username, roleId: form.roleId, branchId: form.branchId }
     if (isNew.value) {
       const created = await userService.create({ ...request, password: form.password })
-      await router.replace({ name: 'user-edit', params: { id: created.id } })
+      await router.replace({ name: 'user-edit', params: { id: created.id }, query: { created: '1' } })
       return
     }
     setUser(await userService.update(props.id!, request))
@@ -108,6 +121,7 @@ async function save(): Promise<void> {
   } finally {
     saving.value = false
   }
+  await revealMessages()
 }
 
 async function toggleStatus(): Promise<void> {
@@ -126,6 +140,7 @@ async function toggleStatus(): Promise<void> {
   } catch (e) {
     error.value = errorMessage(e)
   }
+  await revealMessages()
 }
 
 async function submitReset(): Promise<void> {
@@ -138,6 +153,7 @@ async function submitReset(): Promise<void> {
     resetPassword.value = ''
     setUser(await userService.get(user.value.id))
     success.value = 'Contraseña restablecida. El usuario deberá cambiarla al ingresar.'
+    await revealMessages()
   } catch (e) {
     resetError.value = e instanceof ApiError ? (e.fieldError('newPassword') ?? e.message) : errorMessage(e)
   } finally {
@@ -157,8 +173,10 @@ onMounted(load)
     </PageHeader>
 
     <AsyncState :loading="loading" :error="loadError" @retry="load">
-      <p v-if="success" class="alert alert-success" role="status">{{ success }}</p>
-      <p v-if="error" class="alert alert-error" role="alert">{{ error }}</p>
+      <div ref="messages">
+        <p v-if="success" class="alert alert-success" role="status">{{ success }}</p>
+        <p v-if="error" class="alert alert-error" role="alert">{{ error }}</p>
+      </div>
 
       <form class="card" novalidate @submit.prevent="save">
         <h2 class="card-title">Datos del usuario</h2>
