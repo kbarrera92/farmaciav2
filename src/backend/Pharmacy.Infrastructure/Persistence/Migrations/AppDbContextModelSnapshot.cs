@@ -103,6 +103,20 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                             Description = "Editar los datos y el logo de la empresa, y administrar las formas de pago.",
                             Module = "Configuración",
                             Name = "Administrar configuración"
+                        },
+                        new
+                        {
+                            Code = "catalog.view",
+                            Description = "Consultar las categorías del catálogo de productos.",
+                            Module = "Catálogo",
+                            Name = "Ver catálogo"
+                        },
+                        new
+                        {
+                            Code = "catalog.manage",
+                            Description = "Crear, editar y activar/desactivar categorías del catálogo de productos.",
+                            Module = "Catálogo",
+                            Name = "Administrar catálogo"
                         });
                 });
 
@@ -153,6 +167,46 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                     b.HasIndex("UpdatedByUserId");
 
                     b.ToTable("Branches", (string)null);
+                });
+
+            modelBuilder.Entity("Pharmacy.Core.Categories.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UpdatedByUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Pharmacy.Core.PaymentMethods.PaymentMethod", b =>
@@ -402,6 +456,23 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                 });
 
             modelBuilder.Entity("Pharmacy.Core.Branches.Branch", b =>
+                {
+                    b.HasOne("Pharmacy.Core.Users.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Pharmacy.Core.Users.User", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("UpdatedBy");
+                });
+
+            modelBuilder.Entity("Pharmacy.Core.Categories.Category", b =>
                 {
                     b.HasOne("Pharmacy.Core.Users.User", "CreatedBy")
                         .WithMany()

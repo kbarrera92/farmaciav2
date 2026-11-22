@@ -2,6 +2,7 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Pharmacy.Core.Auth;
 using Pharmacy.Core.Branches;
+using Pharmacy.Core.Categories;
 using Pharmacy.Core.Common;
 using Pharmacy.Core.PaymentMethods;
 using Pharmacy.Core.Roles;
@@ -23,6 +24,7 @@ public sealed class AppDbContext(
     public DbSet<Branch> Branches => Set<Branch>();
     public DbSet<CompanySettings> CompanySettings => Set<CompanySettings>();
     public DbSet<PaymentMethod> PaymentMethods => Set<PaymentMethod>();
+    public DbSet<Category> Categories => Set<Category>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

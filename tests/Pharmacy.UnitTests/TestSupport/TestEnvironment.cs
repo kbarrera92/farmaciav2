@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Pharmacy.Core.Auth;
 using Pharmacy.Core.Branches;
+using Pharmacy.Core.Categories;
 using Pharmacy.Core.Common;
 using Pharmacy.Core.PaymentMethods;
 using Pharmacy.Core.Roles;
@@ -60,6 +61,7 @@ public sealed class TestEnvironment : IDisposable
         Branches = new BranchService(Db);
         CompanySettings = new CompanySettingsService(Db, Clock);
         PaymentMethods = new PaymentMethodService(Db);
+        Categories = new CategoryService(Db);
         Auth = new AuthService(Db, Hasher, PasswordPolicy, UserAccess,
             Options.Create(new LoginLockoutOptions { MaxFailedAttempts = 3, LockoutMinutes = 15 }),
             Clock, NullLogger<AuthService>.Instance);
@@ -78,6 +80,7 @@ public sealed class TestEnvironment : IDisposable
     public BranchService Branches { get; }
     public CompanySettingsService CompanySettings { get; }
     public PaymentMethodService PaymentMethods { get; }
+    public CategoryService Categories { get; }
     public AuthService Auth { get; }
 
     public Role AdminRole { get; private set; } = null!;

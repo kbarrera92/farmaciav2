@@ -4,7 +4,7 @@ Paso 5 de la fase 1 (`docs/migration-dependencies.md` §4). Este documento recog
 original (`docs/database-schema.sql`) antes de implementar. Igual que en los módulos anteriores, la base
 nueva usa **tablas propias con FKs reales**; las tablas originales sirven solo como referencia.
 
-Estado: **análisis**. Las decisiones marcadas como Pendiente se confirman antes de implementar.
+Estado: **en implementación**. Categorías implementadas; el resto en análisis. Las decisiones marcadas como Pendiente se confirman antes de implementar.
 
 ## 1. Tablas originales
 
@@ -105,6 +105,11 @@ Observación: `verInventarioxsuc` y `verInventarioxsucfecha` devuelven `PROVEEDO
 |---|---|---|
 | Laboratorio | **Campo de texto del producto**, sin catálogo propio. Se descarta `LABORATORIO` (ningún SP la usa). | Usuario |
 | Productos | Se implementan **después**, con las mejoras que definirá el usuario. Este análisis es la base. | Usuario |
+| Permisos | `catalog.view` (consultar) y `catalog.manage` (administrar) cubren todo el catálogo: categorías, estanterías y productos. | Usuario |
+| Categorías: campos | Nombre (máx. 50) + activo/inactivo + auditoría. Sin descripción ni jerarquía. Tabla nueva `Categories`. | Usuario |
+| Categorías: unicidad | Nombre único sin distinguir mayúsculas ni espacios al inicio/fin (índice único + validación en el servicio). Las inactivas también cuentan. Distinto del original, que admitía repetidos. | Usuario (P-79) |
+| Categorías: baja | Solo desactivar; no se borran. Una categoría inactiva no se lista por defecto. | Usuario |
+| Datos existentes | Se importarán después mediante script, con Id nuevos (no se conservan los originales). | Usuario (P-80) |
 
 ## 5. Preguntas pendientes
 
@@ -112,6 +117,6 @@ Observación: `verInventarioxsuc` y `verInventarioxsucfecha` devuelven `PROVEEDO
 - **P-76 — Proveedor del producto:** `PRODUCTO.proveedor` es obligatorio, pero proveedores es el paso 6. ¿Se implementa proveedores antes que productos, o el proveedor del producto pasa a ser opcional?
 - **P-77 — Existencias (RN-64):** en la base nueva, ¿se crea la fila de existencia de cada sucursal al crear el producto (y de cada producto al crear una sucursal), o se crea al primer movimiento y la ausencia cuenta como 0? Recomendación: crearla en el primer movimiento (incluida la compra) y tratar la ausencia como 0 en todas las consultas.
 - **P-78 — Estado del producto:** no existe en el original. ¿Se agrega activo/inactivo como en los demás módulos (no se borran productos con movimientos)?
-- **P-79 — Unicidad:** ¿nombre de categoría único? ¿Código de barras único cuando se informa?
-- **P-80 — Datos existentes:** ¿se importarán las categorías y productos del sistema original a la base nueva? Afecta a si se conservan los Id originales (10000+, 1000+).
+- **P-79 — Unicidad:** categoría resuelta (nombre único, ver §4). Pendiente: ¿código de barras único cuando se informa?
+- **P-80 — Datos existentes:** resuelta (importación posterior con Id nuevos, ver §4).
 - **P-74** (ya registrada): productos sin fila en `Existencias` o con stock negativo en los datos actuales.

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Pharmacy.Core.Auth;
 using Pharmacy.Core.Branches;
+using Pharmacy.Core.Categories;
 using Pharmacy.Core.PaymentMethods;
 using Pharmacy.Core.Roles;
 using Pharmacy.Core.Settings;
@@ -29,6 +30,7 @@ public static class DependencyInjection
         services.AddScoped<BranchService>();
         services.AddScoped<CompanySettingsService>();
         services.AddScoped<PaymentMethodService>();
+        services.AddScoped<CategoryService>();
 
         return services;
     }
