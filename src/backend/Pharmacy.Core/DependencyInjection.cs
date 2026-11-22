@@ -3,7 +3,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Pharmacy.Core.Auth;
 using Pharmacy.Core.Branches;
+using Pharmacy.Core.PaymentMethods;
 using Pharmacy.Core.Roles;
+using Pharmacy.Core.Settings;
 using Pharmacy.Core.Users;
 
 namespace Pharmacy.Core;
@@ -25,6 +27,8 @@ public static class DependencyInjection
         services.AddScoped<UserService>();
         services.AddScoped<RoleService>();
         services.AddScoped<BranchService>();
+        services.AddScoped<CompanySettingsService>();
+        services.AddScoped<PaymentMethodService>();
 
         return services;
     }

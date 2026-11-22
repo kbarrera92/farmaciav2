@@ -1,6 +1,8 @@
-# Dependencias de migración — Fase 1
+# Dependencias de migración
 
-Relaciona las funcionalidades de la fase 1 con las entidades, procedimientos y triggers de la base de datos, y define el orden de implementación y los riesgos de migración.
+Relaciona las funcionalidades con las entidades, procedimientos y triggers de la base de datos, y define el orden de implementación y los riesgos de migración.
+
+> **Nota de alcance (actualizada):** las secciones 1–3 se elaboraron cuando la fase 1 era operativa. La fase 1 es ahora administrativa (`docs/phase-1-scope.md`); ventas y reportes del empleado pasan a la fase 2 (`docs/phase-2-scope.md`). El orden vigente está en la sección 4.
 
 ---
 
@@ -87,15 +89,28 @@ L = lectura, E = escritura (insert/update/delete), T = escrita indirectamente po
 
 ## 4. Orden sugerido de implementación
 
-1. **Base técnica**: solución backend/frontend, conexión a la BD existente (scaffold de solo las tablas necesarias), manejo de errores, configuración por entorno.
-2. **Inicio de sesión**: autenticación, roles, sucursal en el token/sesión, estrategia de migración de contraseñas.
-3. **Consulta de productos y existencias** por sucursal (lectura; base para ventas y traslados).
-4. **Ventas**: registro de venta y consulta de ventas propias.
-5. **Generación de traslados**.
-6. **Recepción de traslados**.
-7. **Reporte de ventas por usuario**.
+### Fase 1 — Administración
 
-Justificación: cada paso depende de los anteriores (sesión → sucursal → productos/existencias → movimientos → reportes).
+1. **Base técnica** — Implementado.
+2. **Seguridad**: inicio de sesión, usuarios y roles — Implementado.
+3. **Sucursales** — Implementado.
+4. **Configuración básica**: datos y logo de la empresa, formas de pago — Implementado. `SECUENCIAL` eliminado (IDENTITY); series de factura diferidas con la facturación.
+5. **Catálogo de productos**: categorías, laboratorios, estanterías, productos, precios y consulta de existencias.
+6. **Proveedores**.
+7. **Compras**.
+8. **Cuentas por pagar**.
+9. **Ajustes de inventario**.
+10. **Traslados**: generación y recepción.
+11. **Reportes administrativos**.
+
+Justificación: catálogo y existencias son la base de compras, ajustes, traslados y reportes; compras requiere proveedores; cuentas por pagar depende de compras.
+
+### Fase 2 — Operación de sucursal
+
+1. Búsqueda de productos con existencias de la sucursal.
+2. Ventas y consulta de ventas propias.
+3. Reportes del empleado / corte de caja.
+4. Anulación de ventas y facturación, según se decida.
 
 ---
 
@@ -113,7 +128,7 @@ Justificación: cada paso depende de los anteriores (sesión → sucursal → pr
 | R-08 | Trigger `TR_actualizarDetalle` | Asume una fila y nEntrada = nSalida. | No actualizar `DETSALXTRASLADO` desde la web hasta confirmar P-32. |
 | R-09 | Rendimiento | Sin índices secundarios; catálogo completo en `sp_infoProductos`. | Búsqueda paginada; proponer índices (sin aplicar) en una fase posterior. |
 | R-10 | Hosting compartido | Base `db_acf2eb_*` sugiere hosting compartido (SmarterASP/similar). | Verificar permisos (crear tipos/SP, migraciones) antes de definir estrategia de despliegue. |
-| R-11 | Correlativos compartidos | `IDENTITY` y `SECUENCIAL` usados por ambos sistemas. | No generar números manualmente; usar IDENTITY y `sp_get_sequence`. |
+| R-11 | Correlativos compartidos | `IDENTITY` y `SECUENCIAL` usados por ambos sistemas. | Decidido: el sistema nuevo usa solo IDENTITY; `SECUENCIAL`/`sp_get_sequence` no se migran. |
 
 ---
 
@@ -126,4 +141,4 @@ Justificación: cada paso depende de los anteriores (sesión → sucursal → pr
 5. Zona horaria oficial.
 6. Flujo exacto de generación de traslados (P-30) y de recepción (P-40–P-42).
 7. Alcance exacto del reporte de ventas por usuario (P-50–P-52).
-8. Facturación y anulación de ventas: dentro o fuera de la fase 1 (P-10, P-11).
+8. Anulación de ventas: ¿empleado (fase 2) o administrador? (P-11). Facturación: no se emite por ahora; solo se deja configurable `SERIEFACTURA` en la fase 1 (P-10).

@@ -20,14 +20,17 @@ anterior (`USUARIO`, `TIPOUSUARIO`, `ESTADOUSUARIO`, `SUCURSAL`) sirvió solo co
 ## Modelo de datos
 
 ```text
-Branches (Id, Name único, Address, Phone, IsActive, CreatedAtUtc, UpdatedAtUtc)
-Roles (Id, Name único, Description, IsSystem, IsActive, timestamps)
+Branches (Id, Name único, Address, Phone, IsActive, auditoría)
+Roles (Id, Name único, Description, IsSystem, IsActive, auditoría)
 Permissions (Code PK, Name, Module, Description)          ← sembrada desde código
 RolePermissions (RoleId FK, PermissionCode FK)  PK compuesta
 Users (Id, FullName, Username, NormalizedUsername único, PasswordHash,
        RoleId FK, BranchId FK, IsActive, MustChangePassword,
-       FailedLoginAttempts, LockoutEndUtc, LastLoginAtUtc, SecurityStamp, timestamps)
+       FailedLoginAttempts, LockoutEndUtc, LastLoginAtUtc, SecurityStamp, auditoría)
 ```
+
+"auditoría" = `CreatedAtUtc`, `CreatedByUserId`, `UpdatedAtUtc`, `UpdatedByUserId` (ver
+`docs/modules/configuration.md`, sección Auditoría).
 
 Migración: `src/backend/Pharmacy.Infrastructure/Persistence/Migrations/*_InitialUsers.cs`.
 Script SQL idempotente: `database/migrations/0001_InitialUsers.sql`.

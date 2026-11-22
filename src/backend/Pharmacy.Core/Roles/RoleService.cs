@@ -31,6 +31,8 @@ public sealed class RoleService(IAppDbContext db, UserAccessService userAccess)
     {
         var role = await db.Roles.AsNoTracking()
             .Include(r => r.Permissions)
+            .Include(r => r.CreatedBy)
+            .Include(r => r.UpdatedBy)
             .FirstOrDefaultAsync(r => r.Id == id, ct)
             ?? throw NotFound();
 
@@ -38,7 +40,8 @@ public sealed class RoleService(IAppDbContext db, UserAccessService userAccess)
             ? Permissions.All.Select(p => p.Code).ToList()
             : role.Permissions.Select(p => p.PermissionCode).OrderBy(c => c).ToList();
 
-        return new RoleDetailDto(role.Id, role.Name, role.Description, role.IsSystem, role.IsActive, permissions);
+        return new RoleDetailDto(role.Id, role.Name, role.Description, role.IsSystem, role.IsActive, permissions,
+            new AuditInfo(role.CreatedAtUtc, role.CreatedBy?.FullName, role.UpdatedAtUtc, role.UpdatedBy?.FullName));
     }
 
     public static IReadOnlyList<PermissionGroupDto> GetPermissionCatalog() =>

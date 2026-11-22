@@ -89,6 +89,20 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                             Description = "Crear, editar y activar/desactivar sucursales.",
                             Module = "Sucursales",
                             Name = "Administrar sucursales"
+                        },
+                        new
+                        {
+                            Code = "settings.view",
+                            Description = "Consultar las formas de pago.",
+                            Module = "Configuración",
+                            Name = "Ver configuración"
+                        },
+                        new
+                        {
+                            Code = "settings.manage",
+                            Description = "Editar los datos y el logo de la empresa, y administrar las formas de pago.",
+                            Module = "Configuración",
+                            Name = "Administrar configuración"
                         });
                 });
 
@@ -108,6 +122,9 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -123,12 +140,59 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("UpdatedAtUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("UpdatedByUserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("Name")
                         .IsUnique();
 
+                    b.HasIndex("UpdatedByUserId");
+
                     b.ToTable("Branches", (string)null);
+                });
+
+            modelBuilder.Entity("Pharmacy.Core.PaymentMethods.PaymentMethod", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UpdatedByUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("PaymentMethods", (string)null);
                 });
 
             modelBuilder.Entity("Pharmacy.Core.Roles.Role", b =>
@@ -141,6 +205,9 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .HasMaxLength(200)
@@ -160,10 +227,17 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("UpdatedAtUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("UpdatedByUserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("Name")
                         .IsUnique();
+
+                    b.HasIndex("UpdatedByUserId");
 
                     b.ToTable("Roles", (string)null);
                 });
@@ -185,6 +259,67 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                     b.ToTable("RolePermissions", (string)null);
                 });
 
+            modelBuilder.Entity("Pharmacy.Core.Settings.CompanySettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("Logo")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("LogoContentType")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime?>("LogoUpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TaxId")
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UpdatedByUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("CompanySettings", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_CompanySettings_SingleRow", "[Id] = 1");
+                        });
+                });
+
             modelBuilder.Entity("Pharmacy.Core.Users.User", b =>
                 {
                     b.Property<int>("Id")
@@ -198,6 +333,9 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<int>("FailedLoginAttempts")
                         .HasColumnType("int");
@@ -239,6 +377,9 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("UpdatedAtUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("UpdatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -248,12 +389,67 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("BranchId");
 
+                    b.HasIndex("CreatedByUserId");
+
                     b.HasIndex("NormalizedUsername")
                         .IsUnique();
 
                     b.HasIndex("RoleId");
 
+                    b.HasIndex("UpdatedByUserId");
+
                     b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("Pharmacy.Core.Branches.Branch", b =>
+                {
+                    b.HasOne("Pharmacy.Core.Users.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Pharmacy.Core.Users.User", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("UpdatedBy");
+                });
+
+            modelBuilder.Entity("Pharmacy.Core.PaymentMethods.PaymentMethod", b =>
+                {
+                    b.HasOne("Pharmacy.Core.Users.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Pharmacy.Core.Users.User", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("UpdatedBy");
+                });
+
+            modelBuilder.Entity("Pharmacy.Core.Roles.Role", b =>
+                {
+                    b.HasOne("Pharmacy.Core.Users.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Pharmacy.Core.Users.User", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("Pharmacy.Core.Roles.RolePermission", b =>
@@ -275,6 +471,23 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("Pharmacy.Core.Settings.CompanySettings", b =>
+                {
+                    b.HasOne("Pharmacy.Core.Users.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Pharmacy.Core.Users.User", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("UpdatedBy");
+                });
+
             modelBuilder.Entity("Pharmacy.Core.Users.User", b =>
                 {
                     b.HasOne("Pharmacy.Core.Branches.Branch", "Branch")
@@ -283,15 +496,29 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Pharmacy.Core.Users.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.HasOne("Pharmacy.Core.Roles.Role", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Pharmacy.Core.Users.User", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("Branch");
 
+                    b.Navigation("CreatedBy");
+
                     b.Navigation("Role");
+
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("Pharmacy.Core.Roles.Role", b =>

@@ -20,6 +20,14 @@ export interface ProblemDetails {
   errors?: Record<string, string[]>
 }
 
+/** Who and when created and last modified a record (null user = system). */
+export interface AuditInfo {
+  createdAtUtc: string
+  createdBy: string | null
+  updatedAtUtc: string
+  updatedBy: string | null
+}
+
 export interface SetStatusRequest {
   isActive: boolean
 }

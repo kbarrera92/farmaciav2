@@ -59,7 +59,8 @@ public sealed class UserService(
                 new NamedReference(u.BranchId, u.Branch!.Name),
                 u.IsActive, u.MustChangePassword,
                 u.LockoutEndUtc != null && u.LockoutEndUtc > now,
-                u.LastLoginAtUtc, u.CreatedAtUtc, u.UpdatedAtUtc))
+                u.LastLoginAtUtc,
+                new AuditInfo(u.CreatedAtUtc, u.CreatedBy!.FullName, u.UpdatedAtUtc, u.UpdatedBy!.FullName)))
             .FirstOrDefaultAsync(ct)
             ?? throw NotFound();
     }

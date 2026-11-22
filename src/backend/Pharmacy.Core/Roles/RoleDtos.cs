@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Pharmacy.Core.Common;
 
 namespace Pharmacy.Core.Roles;
 
@@ -17,7 +18,8 @@ public sealed record RoleDetailDto(
     string? Description,
     bool IsSystem,
     bool IsActive,
-    IReadOnlyList<string> Permissions);
+    IReadOnlyList<string> Permissions,
+    AuditInfo Audit);
 
 public sealed class SaveRoleRequest
 {

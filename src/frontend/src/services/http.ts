@@ -70,6 +70,10 @@ async function request<T>(method: string, path: string, options: RequestOptions 
     if (value !== undefined && value !== null && value !== '') url.searchParams.set(key, String(value))
   }
 
+  // FormData (file uploads) is sent as multipart; the browser sets the Content-Type with its boundary.
+  const isForm = options.body instanceof FormData
+  const hasJsonBody = options.body !== undefined && !isForm
+
   let response: Response
   try {
     response = await fetch(url, {
@@ -77,9 +81,9 @@ async function request<T>(method: string, path: string, options: RequestOptions 
       credentials: 'same-origin',
       headers: {
         Accept: 'application/json',
-        ...(options.body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+        ...(hasJsonBody ? { 'Content-Type': 'application/json' } : {}),
       },
-      body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+      body: isForm ? (options.body as FormData) : hasJsonBody ? JSON.stringify(options.body) : undefined,
     })
   } catch {
     throw new ApiError(0, null)

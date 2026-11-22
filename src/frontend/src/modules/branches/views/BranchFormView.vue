@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import AsyncState from '@/components/AsyncState.vue'
+import AuditInfo from '@/components/AuditInfo.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import { useAuthStore } from '@/modules/auth/stores/authStore'
@@ -137,6 +138,7 @@ onMounted(load)
             </button>
           </div>
         </div>
+        <AuditInfo v-if="branch" :audit="branch.audit" />
       </form>
     </AsyncState>
   </section>

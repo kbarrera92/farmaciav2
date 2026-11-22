@@ -1,4 +1,4 @@
-import type { NamedReference } from '@/types/api'
+import type { AuditInfo, NamedReference } from '@/types/api'
 
 export interface UserListItem {
   id: number
@@ -13,8 +13,7 @@ export interface UserListItem {
 
 export interface UserDetail extends UserListItem {
   mustChangePassword: boolean
-  createdAtUtc: string
-  updatedAtUtc: string
+  audit: AuditInfo
 }
 
 export interface UserQuery {

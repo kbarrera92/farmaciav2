@@ -74,6 +74,8 @@ cd src/frontend && npm run build   # compila la SPA en src/backend/Pharmacy.Api/
 4. Configurar `ConnectionStrings:Pharmacy`, `Jwt:Key` e `InitialAdmin:Password` como variables de
    entorno (`ConnectionStrings__Pharmacy`, `Jwt__Key`, …) o en un `appsettings.Production.json`
    que no se sube al repositorio.
+5. Restringir `AllowedHosts` al dominio público (`admin.farmaciahorro.com` en la fase 1).
+   Subdominios, DNS y SSL: ver `docs/deployment.md`.
 
 Para generar el script de una migración nueva:
 

@@ -1,3 +1,5 @@
+import type { AuditInfo } from '@/types/api'
+
 export interface RoleListItem {
   id: number
   name: string
@@ -15,6 +17,7 @@ export interface RoleDetail {
   isSystem: boolean
   isActive: boolean
   permissions: string[]
+  audit: AuditInfo
 }
 
 export interface SaveRoleRequest {

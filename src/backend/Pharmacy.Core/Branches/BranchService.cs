@@ -16,7 +16,8 @@ public sealed class BranchService(IAppDbContext db)
             .OrderBy(b => b.Name)
             .Select(b => new BranchDto(
                 b.Id, b.Name, b.Address, b.Phone, b.IsActive,
-                db.Users.Count(u => u.BranchId == b.Id && u.IsActive)))
+                db.Users.Count(u => u.BranchId == b.Id && u.IsActive),
+                new AuditInfo(b.CreatedAtUtc, b.CreatedBy!.FullName, b.UpdatedAtUtc, b.UpdatedBy!.FullName)))
             .ToListAsync(ct);
     }
 
@@ -34,7 +35,8 @@ public sealed class BranchService(IAppDbContext db)
             .Where(b => b.Id == id)
             .Select(b => new BranchDto(
                 b.Id, b.Name, b.Address, b.Phone, b.IsActive,
-                db.Users.Count(u => u.BranchId == b.Id && u.IsActive)))
+                db.Users.Count(u => u.BranchId == b.Id && u.IsActive),
+                new AuditInfo(b.CreatedAtUtc, b.CreatedBy!.FullName, b.UpdatedAtUtc, b.UpdatedBy!.FullName)))
             .FirstOrDefaultAsync(ct)
             ?? throw NotFound();
     }

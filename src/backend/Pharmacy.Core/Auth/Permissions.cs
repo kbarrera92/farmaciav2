@@ -14,6 +14,8 @@ public static class Permissions
     public const string RolesManage = "roles.manage";
     public const string BranchesView = "branches.view";
     public const string BranchesManage = "branches.manage";
+    public const string SettingsView = "settings.view";
+    public const string SettingsManage = "settings.manage";
 
     public static IReadOnlyList<PermissionDefinition> All { get; } =
     [
@@ -23,6 +25,8 @@ public static class Permissions
         new(RolesManage, "Administrar roles", "Roles", "Crear, editar, activar/desactivar y eliminar roles."),
         new(BranchesView, "Ver sucursales", "Sucursales", "Consultar el catálogo de sucursales."),
         new(BranchesManage, "Administrar sucursales", "Sucursales", "Crear, editar y activar/desactivar sucursales."),
+        new(SettingsView, "Ver configuración", "Configuración", "Consultar las formas de pago."),
+        new(SettingsManage, "Administrar configuración", "Configuración", "Editar los datos y el logo de la empresa, y administrar las formas de pago."),
     ];
 
     public static IReadOnlySet<string> AllCodes { get; } = All.Select(p => p.Code).ToHashSet(StringComparer.Ordinal);

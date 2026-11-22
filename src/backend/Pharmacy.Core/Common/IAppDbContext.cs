@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Pharmacy.Core.Auth;
 using Pharmacy.Core.Branches;
+using Pharmacy.Core.PaymentMethods;
 using Pharmacy.Core.Roles;
+using Pharmacy.Core.Settings;
 using Pharmacy.Core.Users;
 
 namespace Pharmacy.Core.Common;
@@ -17,6 +19,8 @@ public interface IAppDbContext
     DbSet<RolePermission> RolePermissions { get; }
     DbSet<Permission> Permissions { get; }
     DbSet<Branch> Branches { get; }
+    DbSet<CompanySettings> CompanySettings { get; }
+    DbSet<PaymentMethod> PaymentMethods { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

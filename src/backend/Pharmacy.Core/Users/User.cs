@@ -26,8 +26,13 @@ public class User : AuditableEntity
     /// <summary>Forces the user to set a new password after the next login.</summary>
     public bool MustChangePassword { get; set; }
 
+    [NotAudited]
     public int FailedLoginAttempts { get; set; }
+
+    [NotAudited]
     public DateTime? LockoutEndUtc { get; set; }
+
+    [NotAudited]
     public DateTime? LastLoginAtUtc { get; set; }
 
     /// <summary>Changes whenever existing sessions must be invalidated (password reset, deactivation).</summary>

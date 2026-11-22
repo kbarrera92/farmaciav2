@@ -1,4 +1,6 @@
-# Análisis de base de datos — Fase 1
+# Análisis de base de datos — Análisis inicial
+
+> **Nota de alcance (actualizada):** este análisis se hizo cuando la fase 1 era operativa. Ahora la fase 1 es administrativa (`docs/phase-1-scope.md`) y la operación pasa a la fase 2 (`docs/phase-2-scope.md`). Las tablas listadas en 2.5 como "fuera de alcance" (compras, ajustes, cuentas por pagar, catálogos) **entran en la fase 1** y se analizarán en detalle al iniciar cada módulo.
 
 Fuente: `docs/database-schema.sql` (script generado el 21/11/2026, base `db_acf2eb_farmaciahorro`, SQL Server 2022 / MSSQL16).
 

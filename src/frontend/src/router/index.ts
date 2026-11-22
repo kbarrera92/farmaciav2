@@ -18,17 +18,19 @@ export const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
-      path: '/',
+      // Own prefix so '/' never matches this layout; children use absolute paths to keep their URLs.
+      path: '/auth',
       component: AuthLayout,
+      redirect: { name: 'login' },
       children: [
         {
-          path: 'login',
+          path: '/login',
           name: 'login',
           component: () => import('@/modules/auth/views/LoginView.vue'),
           meta: { public: true, title: 'Iniciar sesión' },
         },
         {
-          path: 'cambiar-contrasena',
+          path: '/cambiar-contrasena',
           name: 'change-password',
           component: () => import('@/modules/auth/views/ChangePasswordView.vue'),
           meta: { title: 'Cambiar contraseña' },
@@ -101,6 +103,31 @@ export const router = createRouter({
           component: () => import('@/modules/branches/views/BranchFormView.vue'),
           props: (route) => ({ id: Number(route.params.id) }),
           meta: { permission: Permissions.BranchesView, title: 'Sucursal' },
+        },
+        {
+          path: 'configuracion/empresa',
+          name: 'company-settings',
+          component: () => import('@/modules/settings/views/CompanySettingsView.vue'),
+          meta: { permission: Permissions.SettingsView, title: 'Datos de la empresa' },
+        },
+        {
+          path: 'configuracion/formas-pago',
+          name: 'payment-methods',
+          component: () => import('@/modules/settings/views/PaymentMethodListView.vue'),
+          meta: { permission: Permissions.SettingsView, title: 'Formas de pago' },
+        },
+        {
+          path: 'configuracion/formas-pago/nueva',
+          name: 'payment-method-create',
+          component: () => import('@/modules/settings/views/PaymentMethodFormView.vue'),
+          meta: { permission: Permissions.SettingsManage, title: 'Nueva forma de pago' },
+        },
+        {
+          path: 'configuracion/formas-pago/:id',
+          name: 'payment-method-edit',
+          component: () => import('@/modules/settings/views/PaymentMethodFormView.vue'),
+          props: (route) => ({ id: Number(route.params.id) }),
+          meta: { permission: Permissions.SettingsView, title: 'Forma de pago' },
         },
       ],
     },

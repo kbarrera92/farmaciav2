@@ -9,6 +9,7 @@ using Pharmacy.Api.Controllers;
 using Pharmacy.Api.Errors;
 using Pharmacy.Core;
 using Pharmacy.Core.Auth;
+using Pharmacy.Core.Common;
 using Pharmacy.Infrastructure;
 using Pharmacy.Infrastructure.Persistence;
 
@@ -28,6 +29,8 @@ builder.Services.AddOptions<JwtOptions>()
     .Validate(o => Encoding.UTF8.GetByteCount(o.Key) >= 32, "Jwt:Key must be configured with at least 32 characters.")
     .ValidateOnStart();
 builder.Services.AddSingleton<AuthCookieService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
 builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)

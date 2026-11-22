@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Pharmacy.Core.Common;
 
 namespace Pharmacy.Core.Branches;
 
@@ -8,7 +9,8 @@ public sealed record BranchDto(
     string Address,
     string? Phone,
     bool IsActive,
-    int ActiveUserCount);
+    int ActiveUserCount,
+    AuditInfo Audit);
 
 public sealed class SaveBranchRequest
 {

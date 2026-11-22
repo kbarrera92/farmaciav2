@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Pharmacy.Core.Auth;
+using Pharmacy.Core.Common;
 
 namespace Pharmacy.Core.Users;
 
@@ -23,8 +24,7 @@ public sealed record UserDetailDto(
     bool MustChangePassword,
     bool IsLockedOut,
     DateTime? LastLoginAtUtc,
-    DateTime CreatedAtUtc,
-    DateTime UpdatedAtUtc);
+    AuditInfo Audit);
 
 public sealed class UserQuery
 {

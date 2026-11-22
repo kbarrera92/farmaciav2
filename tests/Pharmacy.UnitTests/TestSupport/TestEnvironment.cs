@@ -7,7 +7,9 @@ using Microsoft.Extensions.Options;
 using Pharmacy.Core.Auth;
 using Pharmacy.Core.Branches;
 using Pharmacy.Core.Common;
+using Pharmacy.Core.PaymentMethods;
 using Pharmacy.Core.Roles;
+using Pharmacy.Core.Settings;
 using Pharmacy.Core.Users;
 using Pharmacy.Infrastructure.Persistence;
 
@@ -20,6 +22,12 @@ public sealed class MutableTimeProvider(DateTimeOffset now) : TimeProvider
     public override DateTimeOffset GetUtcNow() => Now;
 
     public void Advance(TimeSpan by) => Now = Now.Add(by);
+}
+
+/// <summary>User executing the operations in the tests; null (system) unless a test sets it.</summary>
+public sealed class TestCurrentUser : ICurrentUser
+{
+    public int? UserId { get; set; }
 }
 
 /// <summary>
@@ -37,9 +45,10 @@ public sealed class TestEnvironment : IDisposable
         _connection = new SqliteConnection("DataSource=:memory:");
         _connection.Open();
 
+        CurrentUser = new TestCurrentUser();
         Clock = new MutableTimeProvider(new DateTimeOffset(2026, 1, 15, 12, 0, 0, TimeSpan.Zero));
         Db = new AppDbContext(
-            new DbContextOptionsBuilder<AppDbContext>().UseSqlite(_connection).Options, Clock);
+            new DbContextOptionsBuilder<AppDbContext>().UseSqlite(_connection).Options, Clock, CurrentUser);
         Db.Database.EnsureCreated();
 
         Hasher = new PasswordHasher<User>();
@@ -49,6 +58,8 @@ public sealed class TestEnvironment : IDisposable
         Users = new UserService(Db, Hasher, PasswordPolicy, UserAccess, Clock);
         Roles = new RoleService(Db, UserAccess);
         Branches = new BranchService(Db);
+        CompanySettings = new CompanySettingsService(Db, Clock);
+        PaymentMethods = new PaymentMethodService(Db);
         Auth = new AuthService(Db, Hasher, PasswordPolicy, UserAccess,
             Options.Create(new LoginLockoutOptions { MaxFailedAttempts = 3, LockoutMinutes = 15 }),
             Clock, NullLogger<AuthService>.Instance);
@@ -57,6 +68,7 @@ public sealed class TestEnvironment : IDisposable
     }
 
     public MutableTimeProvider Clock { get; }
+    public TestCurrentUser CurrentUser { get; }
     public AppDbContext Db { get; }
     public PasswordHasher<User> Hasher { get; }
     public PasswordPolicy PasswordPolicy { get; }
@@ -64,6 +76,8 @@ public sealed class TestEnvironment : IDisposable
     public UserService Users { get; }
     public RoleService Roles { get; }
     public BranchService Branches { get; }
+    public CompanySettingsService CompanySettings { get; }
+    public PaymentMethodService PaymentMethods { get; }
     public AuthService Auth { get; }
 
     public Role AdminRole { get; private set; } = null!;

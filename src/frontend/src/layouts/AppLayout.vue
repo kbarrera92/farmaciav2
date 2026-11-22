@@ -15,6 +15,8 @@ const navItems: NavItem[] = [
   { label: 'Usuarios', to: '/usuarios', permission: Permissions.UsersView },
   { label: 'Roles y permisos', to: '/roles', permission: Permissions.RolesView },
   { label: 'Sucursales', to: '/sucursales', permission: Permissions.BranchesView },
+  { label: 'Empresa', to: '/configuracion/empresa', permission: Permissions.SettingsView },
+  { label: 'Formas de pago', to: '/configuracion/formas-pago', permission: Permissions.SettingsView },
 ]
 
 const auth = useAuthStore()

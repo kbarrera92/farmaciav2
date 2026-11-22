@@ -1,4 +1,6 @@
-# Reglas de negocio — Fase 1
+# Reglas de negocio — Análisis inicial
+
+> **Nota de alcance (actualizada):** este análisis se hizo cuando la fase 1 era operativa. Ahora la fase 1 es administrativa (`docs/phase-1-scope.md`) y la operación pasa a la fase 2 (`docs/phase-2-scope.md`). Las secciones 1, 3, 4 y 6 aplican a la fase 1; las secciones 2 y 5 (ventas y reporte del empleado) a la fase 2. Las reglas de catálogo, compras, cuentas por pagar, ajustes y configuración se agregarán al analizar cada módulo.
 
 Reglas identificadas a partir de `docs/database-schema.sql`. El código VB.NET original **no está disponible**, por lo que las reglas que dependían de la interfaz o del código de aplicación figuran como pendientes.
 

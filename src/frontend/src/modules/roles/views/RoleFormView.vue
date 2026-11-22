@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import AsyncState from '@/components/AsyncState.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import AuditInfo from '@/components/AuditInfo.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import { useAuthStore } from '@/modules/auth/stores/authStore'
 import { Permissions } from '@/modules/auth/types'
@@ -199,6 +200,7 @@ onMounted(load)
           </button>
         </div>
         <p v-if="role" class="muted small">Estado: <StatusBadge :active="role.isActive" /></p>
+        <AuditInfo v-if="role" :audit="role.audit" />
       </form>
     </AsyncState>
   </section>

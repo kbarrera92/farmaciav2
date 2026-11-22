@@ -1,90 +1,104 @@
-# Fase 1 — Alcance funcional
+# Fase 1 — Alcance funcional (administración)
 
 ## 1. Objetivo
 
-Migrar a la nueva aplicación web (ASP.NET Core + Vue 3) las operaciones diarias que realizan los **empleados de cada sucursal**, conservando el comportamiento del sistema original y reutilizando la base de datos SQL Server existente (`db_acf2eb_farmaciahorro`).
+Migrar a la nueva aplicación web (ASP.NET Core + Vue 3) la **administración general** del sistema: seguridad, sucursales, catálogo, compras, cuentas por pagar, inventario (ajustes y traslados), configuración y reportes administrativos. Se conserva el comportamiento del sistema original y se parte del esquema de la base de datos SQL Server existente (`db_acf2eb_farmaciahorro`).
 
-La administración general del sistema queda para fases posteriores.
+La operación diaria de los empleados de sucursal (ventas, caja) queda para la **fase 2** (`docs/phase-2-scope.md`).
+
+En producción, la administración se publica en **`https://admin.farmaciahorro.com`** (ver `docs/deployment.md`).
 
 ## 2. Fuentes analizadas
 
 | Fuente | Disponible | Observación |
 |---|---|---|
 | `docs/database-schema.sql` | Sí | Script completo: 37 tablas, 1 tipo tabla, 36 procedimientos, 8 triggers. |
-| Código fuente VB.NET / Windows Forms | **No** | No está en el proyecto. Todo comportamiento de pantalla, validaciones de UI y consultas embebidas en el código queda **Pendiente de confirmar**. |
-| Datos reales (catálogos `TIPOUSUARIO`, `ESTADOUSUARIO`, `SECUENCIAL`, etc.) | No | Solo se conoce la estructura, no los valores cargados. |
+| Código fuente VB.NET / Windows Forms | **No** | Todo comportamiento de pantalla, validaciones de UI y consultas embebidas queda **Pendiente de confirmar**. |
+| Datos reales (catálogos, `SECUENCIAL`, etc.) | No | Solo se conoce la estructura, no los valores cargados. |
+
+`docs/database-analysis.md` y `docs/business-rules.md` cubren a fondo seguridad, traslados e inventario. Las tablas de catálogo, compras, cuentas por pagar, ajustes y configuración se analizarán en detalle **al iniciar cada módulo** (no se inventan reglas antes de ese análisis).
 
 ## 3. Funcionalidades incluidas
 
-### 3.1 Inicio de sesión
-- Autenticación del empleado por `nick` y contraseña contra `USUARIO`.
-- Solo usuarios con estado `ACTIVO` (Confirmado, `sp_validaUsuario`).
-- Al iniciar sesión se obtiene: id, nombre, tipo/rol y **sucursal asignada** del usuario (Confirmado).
-- Registro en bitácora (`BITACORA` vía `sp_grabaBitacora`) — Pendiente de confirmar qué acciones registra el sistema original (inicio de sesión, ventas, traslados...).
-- Cierre de sesión.
+### 3.1 Seguridad — Implementado
+- Inicio y cierre de sesión, cambio obligatorio de contraseña, bloqueo por intentos fallidos.
+- Usuarios, roles con permisos y sucursal asignada (`docs/modules/users.md`).
+- Tablas de referencia: `USUARIO`, `TIPOUSUARIO`, `ESTADOUSUARIO`, `BITACORA`.
 
-### 3.2 Ventas
-- Búsqueda/consulta de productos con existencia de la sucursal del usuario (`sp_infoProductos`, `sp_getStoc`).
-- Registro de venta: cabecera + detalle + descuento de existencias en una transacción (`grabaVenta`).
-- Formas de pago: efectivo, tarjeta (con número de autorización) o combinación de ambas (Confirmado por estructura de `VENTA`).
-- Cliente asociado a la venta (campo `VENTA.cliente`, probablemente NIT) — detalles Pendientes de confirmar.
-- Consulta de ventas propias / detalle de una venta (`sp_ventasxuser`, `getDetallesVentas`) — Pendiente confirmar si es parte de la operación del empleado.
+### 3.2 Sucursales — Implementado
+- Mantenimiento de sucursales (`SUCURSAL`).
 
-### 3.3 Generación de traslados entre sucursales
-- Registro de salida por traslado desde la sucursal del usuario hacia otra sucursal (`SALXTRASLADO` + `DETSALXTRASLADO`).
-- Creación de la entrada pendiente en la sucursal destino (`ENTXTRASLADO` + `DETENTRADAXTRASLADOTEMP`) — Pendiente confirmar el flujo exacto (no existe SP que lo haga; lo hacía el código VB.NET).
-- Descuento automático de existencias en origen (trigger `trg_ActualizarExistencias_SalidaXTraslado`).
-- Consulta de traslados generados y su detalle (`getTraslados`, `getDetalleTraslado`).
+### 3.3 Catálogo de productos
+- Productos, categorías, laboratorios y estanterías: `PRODUCTO`, `CATEGORIA`, `LABORATORIO`, `ESTANTERIA`.
+- Precios del producto (en `PRODUCTO`; no existe historial de precios — RN-63, Confirmado).
+- Consulta de existencias por sucursal (`Existencias`; `sp_infoProductos`, `sp_getStoc` como referencia).
+- Pendiente de confirmar: si al crear un producto se crea su fila en `Existencias` para cada sucursal (afecta compras, RN-64).
 
-### 3.4 Recepción de traslados
-- Consulta de traslados pendientes de recibir (`recibido = 'N'`).
-- Visualización del detalle a recibir (`sp_RecibeTraslado` opción `B`).
-- Confirmación de recepción (`sp_RecibeTraslado` opción `R`): mueve el detalle temporal al definitivo, suma existencias en destino (trigger) y marca el traslado como recibido.
-- La recepción es **total** (todo o nada) en el sistema actual (Confirmado por el SP).
+### 3.4 Proveedores
+- Mantenimiento de `PROVEEDOR`. Se incluye porque compras y cuentas por pagar dependen de él.
 
-### 3.5 Reporte de ventas por usuario
-- Reporte de ventas del usuario con diferencias entre precio vendido y precio vigente del producto (`ReporteDeVentasPorUsuario`).
-- Posibles reportes complementarios: ventas por usuario y fecha (`sp_ventasxusuariofecha`), corte de caja por usuario (`sp_cortecaja`), por mes/intervalo (`sp_cortexmesusuario`, `sp_cortexmesintervalousuario`).
-- **Pendiente de confirmar** cuál o cuáles de estos reportes usa realmente el empleado y con qué filtros.
+### 3.5 Compras
+- Registro y consulta de compras: `COMPRA`, `DETALLECOMPRA` (`getCompras`, `getDetalleCompra`, `sp_infoProdCompras` como referencia).
+- Suma de existencias por trigger `trg_ActualizarExistencias_Compra` (la API no debe duplicarla); totales mantenidos por `TR_updateTotalActualizarC` y `TR_actualizartotalBorrarC`.
+- Pendiente de confirmar: relación exacta entre compra y cuenta por pagar (compra al crédito / contado).
 
-## 4. Datos de consulta permitidos (solo lectura)
+### 3.6 Cuentas por pagar
+- Consulta y gestión de `CUENTAXPAGAR`, `DETALLECXP`, `ESTADOCXP` (`sp_vercxp`, `sp_vercxpxmes`, `sp_verDetallesCxP` como referencia).
+- Pendiente de confirmar: registro de abonos/pagos y cambios de estado.
 
-Estas entidades no se administran en la fase 1, pero sí se leen:
+### 3.7 Ajustes de inventario
+- Registro y consulta de ajustes: `AJUSTE`, `DETAJUSTE`, `TIPOAJUSTE` (`getAjustes`, `detAjustes` como referencia).
+- Existencias actualizadas por triggers `trg_ActualizarExistencias_Ajuste` y `trg_ActualizarExistencias_AjusteEliminaDetalle`.
+
+### 3.8 Traslados entre sucursales
+- Generación: `SALXTRASLADO` + `DETSALXTRASLADO`, entrada pendiente en destino `ENTXTRASLADO` + `DETENTRADAXTRASLADOTEMP` (flujo exacto Pendiente, P-30). Descuento en origen por trigger `trg_ActualizarExistencias_SalidaXTraslado`.
+- Recepción total (todo o nada) con `sp_RecibeTraslado` (opciones `B` y `R`); suma en destino por trigger `trg_ActualizarExistencias_EntradaXTraslado`.
+- Consulta de traslados y su detalle (`getTraslados`, `getDetalleTraslado`, `getDetalleTrasladoE`).
+- Reglas detalladas: `docs/business-rules.md` secciones 3 y 4.
+- Pendiente de confirmar: si en la fase 2 los empleados de sucursal también generarán/recibirán traslados desde el área operativa.
+
+### 3.9 Configuración — Implementado (configuración básica)
+- Datos de la empresa y **logo** (nuevo; no existe en el sistema original): un solo registro por empresa, logo PNG/JPEG de hasta 512 KB guardado en la base de datos.
+- Formas de pago (`FORMAPAGO`), sin valores iniciales.
+- Correlativos: **se elimina `SECUENCIAL`**; el sistema nuevo usa IDENTITY (decisión del usuario).
+- Series de factura (`SERIEFACTURA`): diferidas a la fase en que se active la facturación.
+- Detalle: `docs/modules/configuration.md`.
+
+### 3.10 Reportes administrativos
+- Inventario por sucursal y por categoría (`verInventarioxsuc`, `verInventarioxsucfecha`, `verinventarioxcat`).
+- Productos bajo stock mínimo (`verprodsstockmin`).
+- Ventas por sucursal y por producto (`sp_ventasSuc`, `ventasdiariassuc`, `sp_ventasxproducto`, `sp_cortexmes`, `sp_cortexmesintervalo`).
+- Cuentas por pagar (`sp_vercxp`, `sp_vercxpxmes`).
+- Pendiente de confirmar: filtros y columnas que usa realmente el administrador. Los reportes de ventas leen datos que hoy genera el sistema VB.NET.
+
+## 4. Facturación — preparada, no implementada
+
+El negocio **no factura actualmente**. Las tablas `FACTURA` y `SERIEFACTURA` existen pero ningún procedimiento las usa. En fase 1:
+- `SERIEFACTURA` y los correlativos de factura se configurarán cuando se active la facturación (decisión del usuario).
+- No se emiten facturas ni se integra con ningún servicio externo.
+- Pendiente de confirmar al activarla: requisitos fiscales/electrónicos aplicables.
+
+## 5. Datos de consulta (solo lectura)
 
 | Entidad | Uso en fase 1 |
 |---|---|
-| `USUARIO`, `TIPOUSUARIO`, `ESTADOUSUARIO` | Autenticación, rol y sucursal del usuario. |
-| `SUCURSAL` | Sucursal del usuario, sucursal destino del traslado, nombres en listados. |
-| `PRODUCTO` | Búsqueda, precio, descripción, código de barras. |
-| `Existencias` | Stock por sucursal (lectura; la escritura ocurre a través de ventas y traslados). |
-| `CATEGORIA`, `PROVEEDOR` | Datos descriptivos en búsqueda de productos (`sp_infoProductos`). |
-| `CLIENTE` | Búsqueda de cliente por NIT para la venta (Pendiente de confirmar si se crea cliente desde la venta). |
+| `VENTA`, `DETALLEVENTA` | Reportes de ventas administrativos. |
+| `VENTASELIMINADAS`, `DETALLEVENTASELIMINADOS` | Pendiente de confirmar si hay reporte administrativo de ventas eliminadas (`verVentasEliminadas`, `getDetalleVentaElim`). |
+| `CLIENTE` | Solo como dato descriptivo en reportes, si aplica. |
 
-## 5. Funcionalidades excluidas
+## 6. Excluido (fase 2 u otra)
 
-- Gestión de usuarios, roles, estados.
-- Gestión de sucursales.
-- Gestión de productos, categorías, laboratorios, estanterías, precios.
-- Gestión de proveedores y clientes (salvo lo que se confirme necesario para la venta).
-- Compras (`COMPRA`, `DETALLECOMPRA`) y cuentas por pagar (`CUENTAXPAGAR`, `DETALLECXP`, `ESTADOCXP`).
-- Ajustes de inventario (`AJUSTE`, `DETAJUSTE`, `TIPOAJUSTE`).
-- Configuración general (`SECUENCIAL`, `SERIEFACTURA`, `FORMAPAGO`).
-- Reportes administrativos: inventario por sucursal/categoría, stock mínimo, ventas por sucursal, ventas por producto, cuentas por pagar.
-- Trasiegos legados (`TRASIEGOE`, `TRASIEGOSSAL`, `DETENTRADAXT`, `DETSALIDAXT`) — Pendiente confirmar si siguen en uso.
+- Registro de ventas, búsqueda de productos en caja, clientes en venta, corte de caja y reportes del empleado → fase 2.
+- Anulación de ventas → Pendiente (fase 2 o administración).
+- Emisión de facturas → cuando se active la facturación.
+- Trasiegos legados (`TRASIEGOE`, `TRASIEGOSSAL`, `DETENTRADAXT`, `DETSALIDAXT`) — Pendiente confirmar si siguen en uso (P-72).
 
-### Fuera de alcance salvo decisión explícita (Pendiente de confirmar)
-- **Anulación/eliminación de ventas** (`VENTASELIMINADAS`, `DETALLEVENTASELIMINADOS`): existe estructura, pero no se sabe si la realiza el empleado o un administrador.
-- **Facturación** (`FACTURA`, `SERIEFACTURA`): existen tablas, pero ningún procedimiento las usa. No se sabe si el sistema actual emite facturas.
-- **Edición o cancelación de traslados** ya generados.
+## 7. Supuestos de la fase
 
-## 6. Supuestos de la fase
+1. La nueva aplicación podría convivir temporalmente con el sistema VB.NET (Pendiente de confirmar, P-71).
+2. Los triggers de existencias se mantienen; la nueva aplicación no duplica su lógica.
+3. Cualquier cambio de estructura se hace con migraciones y scripts versionados.
 
-1. La nueva aplicación trabajará sobre la **misma base de datos** y podría convivir temporalmente con el sistema VB.NET (Pendiente de confirmar).
-2. Los triggers de existencias se mantienen activos; la nueva aplicación no debe duplicar su lógica.
-3. No se modifica la estructura de la base de datos en esta fase de análisis.
+## 8. Orden sugerido
 
-## 7. Entregables relacionados
-
-- `docs/database-analysis.md` — tablas, relaciones, procedimientos y triggers.
-- `docs/business-rules.md` — reglas de negocio confirmadas y pendientes.
-- `docs/migration-dependencies.md` — dependencias, orden de implementación y riesgos.
+Ver `docs/migration-dependencies.md` sección 4.

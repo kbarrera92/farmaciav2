@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import AsyncState from '@/components/AsyncState.vue'
+import AuditInfo from '@/components/AuditInfo.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import { useAuthStore } from '@/modules/auth/stores/authStore'
@@ -230,8 +231,8 @@ onMounted(load)
             <div v-if="user.isLockedOut"><dt>Bloqueo</dt><dd><span class="badge badge-warning">Bloqueado temporalmente</span></dd></div>
             <div><dt>Cambio de contraseña pendiente</dt><dd>{{ user.mustChangePassword ? 'Sí' : 'No' }}</dd></div>
             <div><dt>Último ingreso</dt><dd>{{ formatDateTime(user.lastLoginAtUtc) }}</dd></div>
-            <div><dt>Creado</dt><dd>{{ formatDateTime(user.createdAtUtc) }}</dd></div>
           </dl>
+          <AuditInfo :audit="user.audit" />
           <div v-if="canManage && !isSelf" class="actions">
             <button type="button" :class="user.isActive ? 'btn btn-danger' : 'btn btn-secondary'" @click="toggleStatus">
               {{ user.isActive ? 'Desactivar usuario' : 'Activar usuario' }}
