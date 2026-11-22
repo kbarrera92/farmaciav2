@@ -6,9 +6,6 @@ namespace Pharmacy.Core.Products;
 
 public sealed class ProductService(IAppDbContext db)
 {
-    /// <summary>Largest value that fits the decimal(10,2) price and cost columns.</summary>
-    private const decimal MaxMoney = 99_999_999.99m;
-
     public async Task<PagedResult<ProductListItemDto>> ListAsync(ProductQuery query, CancellationToken ct = default)
     {
         var (page, pageSize) = Paging.Normalize(query.Page, query.PageSize);
@@ -103,8 +100,8 @@ public sealed class ProductService(IAppDbContext db)
 
         var price = request.Price!.Value;
         var cost = request.Cost!.Value;
-        ValidateMoney(errors, "cost", "El costo", cost);
-        ValidateMoney(errors, "price", "El precio", price);
+        MoneyRules.Validate(errors, "cost", "El costo", cost);
+        MoneyRules.Validate(errors, "price", "El precio", price);
         if (!errors.Has("cost") && !errors.Has("price") && price <= cost)
             errors.Add("price", "El precio debe ser mayor al costo.");
         if (request.MinStock < 0)
@@ -196,7 +193,7 @@ public sealed class ProductService(IAppDbContext db)
             if (row.Price is { } branchPrice)
             {
                 var before = errors.Count;
-                ValidateMoney(errors, "branches", $"Sucursal {branch.Name}: el precio", branchPrice);
+                MoneyRules.Validate(errors, "branches", $"Sucursal {branch.Name}: el precio", branchPrice);
                 if (errors.Count == before && branchPrice <= cost)
                     errors.Add("branches", $"Sucursal {branch.Name}: el precio debe ser mayor al costo.");
             }
@@ -206,16 +203,6 @@ public sealed class ProductService(IAppDbContext db)
         }
 
         return rows;
-    }
-
-    private static void ValidateMoney(ValidationErrors errors, string field, string label, decimal value)
-    {
-        if (value <= 0)
-            errors.Add(field, $"{label} debe ser mayor a 0.");
-        else if (value > MaxMoney)
-            errors.Add(field, $"{label} no puede superar {MaxMoney:N2}.");
-        else if (decimal.Round(value, 2) != value)
-            errors.Add(field, $"{label} admite como máximo 2 decimales.");
     }
 
     /// <summary>Makes the product's branch settings match the requested rows (add, update, remove).</summary>
@@ -256,26 +243,4 @@ public sealed class ProductService(IAppDbContext db)
     }
 
     private static NotFoundException NotFound() => new("El producto no existe.");
-
-    private sealed class ValidationErrors
-    {
-        private readonly Dictionary<string, List<string>> _errors = [];
-
-        public int Count => _errors.Values.Sum(e => e.Count);
-
-        public bool Has(string field) => _errors.ContainsKey(field);
-
-        public void Add(string field, string message)
-        {
-            if (!_errors.TryGetValue(field, out var list))
-                _errors[field] = list = [];
-            list.Add(message);
-        }
-
-        public void ThrowIfAny()
-        {
-            if (_errors.Count > 0)
-                throw new ValidationException(_errors.ToDictionary(e => e.Key, e => e.Value.ToArray()));
-        }
-    }
 }

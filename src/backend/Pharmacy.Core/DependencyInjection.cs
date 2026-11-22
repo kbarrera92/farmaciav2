@@ -4,8 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Pharmacy.Core.Auth;
 using Pharmacy.Core.Branches;
 using Pharmacy.Core.Categories;
+using Pharmacy.Core.Common;
 using Pharmacy.Core.PaymentMethods;
 using Pharmacy.Core.Products;
+using Pharmacy.Core.Purchases;
 using Pharmacy.Core.Roles;
 using Pharmacy.Core.Settings;
 using Pharmacy.Core.Suppliers;
@@ -19,6 +21,7 @@ public static class DependencyInjection
     {
         services.Configure<LoginLockoutOptions>(configuration.GetSection(LoginLockoutOptions.SectionName));
         services.Configure<PasswordPolicyOptions>(configuration.GetSection(PasswordPolicyOptions.SectionName));
+        services.Configure<BusinessOptions>(configuration.GetSection(BusinessOptions.SectionName));
 
         services.AddMemoryCache();
         services.AddSingleton(TimeProvider.System);
@@ -35,6 +38,7 @@ public static class DependencyInjection
         services.AddScoped<CategoryService>();
         services.AddScoped<SupplierService>();
         services.AddScoped<ProductService>();
+        services.AddScoped<PurchaseService>();
 
         return services;
     }

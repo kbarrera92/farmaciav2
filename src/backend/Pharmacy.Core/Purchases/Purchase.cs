@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Pharmacy.Core.Branches;
 using Pharmacy.Core.Common;
 using Pharmacy.Core.PaymentMethods;
@@ -7,6 +8,7 @@ using Pharmacy.Core.Users;
 
 namespace Pharmacy.Core.Purchases;
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum PurchaseType
 {
     Cash = 1,
@@ -73,6 +75,7 @@ public class PurchaseItem
     public decimal Subtotal { get; set; }
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum AccountPayableStatus
 {
     Pending = 1,

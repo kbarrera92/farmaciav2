@@ -4,7 +4,7 @@ Paso 7 de la fase 1 (`docs/migration-dependencies.md` §4). Este documento recog
 original (`docs/database-schema.sql`) antes de implementar. Igual que en los módulos anteriores, la base
 nueva usa **tablas propias con FKs reales**; las tablas originales sirven solo como referencia.
 
-Estado: **análisis cerrado**. Backend en curso: tablas y permisos hechos; servicio de compras y consulta de existencias pendientes. P-81 a P-88 respondidas.
+Estado: **análisis cerrado**. Backend en curso: tablas, permisos y servicio de compras hechos; consulta de existencias y frontend pendientes. P-81 a P-88 respondidas.
 
 Este módulo incluye también la **tabla de existencias** y su **consulta por sucursal**, que quedaron fuera del
 catálogo: la compra es el primer movimiento que genera stock (P-77, `docs/modules/catalog.md` §4).
@@ -94,6 +94,11 @@ De este módulo:
 | Fechas | El usuario elige la fecha de compra (hoy por defecto, no futura). En contado, la fecha de pago es la fecha de compra. | Usuario |
 | Anulación | Exige un **motivo** (máx. 250). Queda registrado quién y cuándo anuló. | Usuario |
 | Cuenta por pagar | Este paso crea una tabla mínima `AccountsPayable` (compra, proveedor, fecha de inicio, fecha límite, total, saldo, estado Pendiente/Pagada). No hay tabla de abonos todavía: hasta que exista el módulo de cuentas por pagar, "tiene abonos" significa saldo distinto del total. | Usuario |
+
+| Fecha "de hoy" | La regla "no futura" usa la hora local del negocio: opción `Business:UtcOffsetHours` (por defecto −6, Guatemala sin horario de verano, igual que el desfase del original). | Decisión técnica |
+| Edición | La sucursal de una compra registrada no se puede cambiar (el stock ya se aplicó a esa sucursal). Se pueden editar fecha, proveedor, documento, tipo, forma de pago, días de crédito y líneas. | Decisión técnica (P-83) |
+
+API: `GET/POST /api/purchases`, `GET/PUT /api/purchases/{id}`, `POST /api/purchases/{id}/cancel`, `GET /api/purchases/products` (productos elegibles con existencia y precio de la sucursal).
 
 Tablas nuevas (migración `0007_Purchases.sql`): `Purchases`, `PurchaseItems`, `Stocks` y `AccountsPayable`.
 
