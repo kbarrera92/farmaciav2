@@ -12,7 +12,8 @@ internal sealed class BranchConfiguration : IEntityTypeConfiguration<Branch>
     public void Configure(EntityTypeBuilder<Branch> builder)
     {
         builder.ToTable("Branches");
-        builder.Property(b => b.Name).HasMaxLength(100).IsRequired();
+        builder.Property(b => b.Name).HasMaxLength(100).IsRequired()
+            .UseCollation(DbCollations.SpanishCaseAndAccentInsensitive);
         builder.Property(b => b.Address).HasMaxLength(150).IsRequired();
         builder.Property(b => b.Phone).HasMaxLength(50);
         builder.HasIndex(b => b.Name).IsUnique();

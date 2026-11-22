@@ -145,7 +145,8 @@ namespace Pharmacy.Infrastructure.Persistence.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .UseCollation("Modern_Spanish_100_CI_AI");
 
                     b.Property<string>("Phone")
                         .HasMaxLength(50)

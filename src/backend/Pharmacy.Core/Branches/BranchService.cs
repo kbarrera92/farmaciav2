@@ -86,11 +86,11 @@ public sealed class BranchService(IAppDbContext db)
         return await GetAsync(id, ct);
     }
 
+    /// <summary>The Name column uses a case and accent insensitive collation, so plain equality is enough.</summary>
     private async Task EnsureUniqueNameAsync(string name, int? excludeId, CancellationToken ct)
     {
-        var normalized = TextNormalizer.Normalize(name);
         var exists = await db.Branches.AnyAsync(
-            b => b.Name.ToUpper() == normalized && (excludeId == null || b.Id != excludeId), ct);
+            b => b.Name == name && (excludeId == null || b.Id != excludeId), ct);
         if (exists)
             throw new ConflictException($"Ya existe una sucursal con el nombre '{name}'.");
     }
