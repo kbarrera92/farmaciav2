@@ -111,10 +111,12 @@ Observación: `verInventarioxsuc` y `verInventarioxsucfecha` devuelven `PROVEEDO
 | Categorías: baja | Solo desactivar; no se borran. Una categoría inactiva no se lista por defecto. | Usuario |
 | Categorías en productos | Al crear o editar un producto solo se ofrecen categorías activas. Un producto cuya categoría se desactiva la conserva. | Usuario |
 | Datos existentes | Se importarán después mediante script, con Id nuevos (no se conservan los originales). | Usuario (P-80) |
+| Estantería | **Ubicación por sucursal en texto libre** (p. ej. "A-3", "Vitrina 2"). Su objetivo es que el usuario sepa dónde buscar el producto en su sucursal. Sin catálogo ni pantalla de estanterías; se descarta `ESTANTERIA`. Dónde se guarda depende de P-77. | Usuario (P-75) |
+| Formato de textos | Ver `docs/data-conventions.md`. | Usuario |
 
 ## 5. Preguntas pendientes
 
-- **P-75 — Estantería:** en el original es solo un número. ¿Se mantiene como número/texto libre en el producto, o se crea un catálogo con nombre (p. ej. "A-3")? ¿La ubicación debe ser distinta por sucursal?
+- **P-75 — Estantería:** resuelta (texto libre por sucursal, ver §4).
 - **P-76 — Proveedor del producto:** `PRODUCTO.proveedor` es obligatorio, pero proveedores es el paso 6. ¿Se implementa proveedores antes que productos, o el proveedor del producto pasa a ser opcional?
 - **P-77 — Existencias (RN-64):** en la base nueva, ¿se crea la fila de existencia de cada sucursal al crear el producto (y de cada producto al crear una sucursal), o se crea al primer movimiento y la ausencia cuenta como 0? Recomendación: crearla en el primer movimiento (incluida la compra) y tratar la ausencia como 0 en todas las consultas.
 - **P-78 — Estado del producto:** no existe en el original. ¿Se agrega activo/inactivo como en los demás módulos (no se borran productos con movimientos)?
