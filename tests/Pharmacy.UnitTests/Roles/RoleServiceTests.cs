@@ -33,10 +33,12 @@ public sealed class RoleServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task Role_name_must_be_unique_ignoring_case()
+    public async Task Role_name_must_be_unique_ignoring_case_and_accents()
     {
         await Assert.ThrowsAsync<ConflictException>(
             () => _env.Roles.CreateAsync(new SaveRoleRequest { Name = "VENDEDOR" }));
+        await Assert.ThrowsAsync<ConflictException>(
+            () => _env.Roles.CreateAsync(new SaveRoleRequest { Name = "véndedor" }));
     }
 
     [Fact]

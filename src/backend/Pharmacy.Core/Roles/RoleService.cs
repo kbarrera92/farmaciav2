@@ -137,11 +137,11 @@ public sealed class RoleService(IAppDbContext db, UserAccessService userAccess)
             throw new BusinessRuleException("El rol de sistema no se puede modificar ni eliminar.");
     }
 
+    /// <summary>The Name column uses a case and accent insensitive collation, so plain equality is enough.</summary>
     private async Task EnsureUniqueNameAsync(string name, int? excludeId, CancellationToken ct)
     {
-        var normalized = TextNormalizer.Normalize(name);
         var exists = await db.Roles.AnyAsync(
-            r => r.Name.ToUpper() == normalized && (excludeId == null || r.Id != excludeId), ct);
+            r => r.Name == name && (excludeId == null || r.Id != excludeId), ct);
         if (exists)
             throw new ConflictException($"Ya existe un rol con el nombre '{name}'.");
     }

@@ -26,7 +26,8 @@ internal sealed class PaymentMethodConfiguration : IEntityTypeConfiguration<Paym
     public void Configure(EntityTypeBuilder<PaymentMethod> builder)
     {
         builder.ToTable("PaymentMethods");
-        builder.Property(p => p.Name).HasMaxLength(50).IsRequired();
+        builder.Property(p => p.Name).HasMaxLength(50).IsRequired()
+            .UseCollation(DbCollations.SpanishCaseAndAccentInsensitive);
         builder.HasIndex(p => p.Name).IsUnique();
     }
 }

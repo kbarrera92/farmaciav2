@@ -56,11 +56,11 @@ public sealed class PaymentMethodService(IAppDbContext db)
             p.Id, p.Name, p.IsActive,
             new AuditInfo(p.CreatedAtUtc, p.CreatedBy!.FullName, p.UpdatedAtUtc, p.UpdatedBy!.FullName)));
 
+    /// <summary>The Name column uses a case and accent insensitive collation, so plain equality is enough.</summary>
     private async Task EnsureUniqueNameAsync(string name, int? excludeId, CancellationToken ct)
     {
-        var normalized = TextNormalizer.Normalize(name);
         var exists = await db.PaymentMethods.AnyAsync(
-            p => p.Name.ToUpper() == normalized && (excludeId == null || p.Id != excludeId), ct);
+            p => p.Name == name && (excludeId == null || p.Id != excludeId), ct);
         if (exists)
             throw new ConflictException($"Ya existe una forma de pago con el nombre '{name}'.");
     }

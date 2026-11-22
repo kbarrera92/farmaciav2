@@ -46,7 +46,8 @@ internal sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
     public void Configure(EntityTypeBuilder<Role> builder)
     {
         builder.ToTable("Roles");
-        builder.Property(r => r.Name).HasMaxLength(50).IsRequired();
+        builder.Property(r => r.Name).HasMaxLength(50).IsRequired()
+            .UseCollation(DbCollations.SpanishCaseAndAccentInsensitive);
         builder.Property(r => r.Description).HasMaxLength(200);
         builder.HasIndex(r => r.Name).IsUnique();
 

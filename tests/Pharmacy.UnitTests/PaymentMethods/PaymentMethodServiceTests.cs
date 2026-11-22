@@ -19,6 +19,14 @@ public sealed class PaymentMethodServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task Name_must_be_unique_ignoring_accents()
+    {
+        await Create("Crédito");
+
+        await Assert.ThrowsAsync<ConflictException>(() => Create("CREDITO"));
+    }
+
+    [Fact]
     public async Task Renaming_keeping_the_same_name_is_allowed_but_not_to_another_existing_name()
     {
         var cash = await Create("Contado");
