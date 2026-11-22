@@ -15,6 +15,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Inicio', to: '/' },
   { label: 'Categorías', to: '/catalogo/categorias', permission: Permissions.CatalogView, group: 'Catálogo' },
+  { label: 'Proveedores', to: '/catalogo/proveedores', permission: Permissions.CatalogView, group: 'Catálogo' },
   { label: 'Usuarios', to: '/usuarios', permission: Permissions.UsersView, group: 'Seguridad' },
   { label: 'Roles y permisos', to: '/roles', permission: Permissions.RolesView, group: 'Seguridad' },
   { label: 'Empresa', to: '/configuracion/empresa', permission: Permissions.SettingsView, group: 'Configuración' },
